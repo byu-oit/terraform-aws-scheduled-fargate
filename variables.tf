@@ -37,7 +37,7 @@ variable "ecs_cluster_arn" {
   default     = null
 }
 variable "event_role_arn" {
-  type = string
+  type        = string
   description = "IAM Role ARN (typically PowerBuilder)"
 }
 

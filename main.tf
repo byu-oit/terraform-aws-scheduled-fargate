@@ -216,7 +216,7 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
   target_id = "${var.app_name}-scheduled-task-target"
   rule      = aws_cloudwatch_event_rule.scheduled_task.name
   arn       = var.ecs_cluster_arn == null ? aws_ecs_cluster.cluster[0].arn : var.ecs_cluster_arn
-//  role_arn  = aws_iam_role.scheduled-task-cloudwatch.arn # TODO see if we can use this role instead of PowerBuilder
+  //  role_arn  = aws_iam_role.scheduled-task-cloudwatch.arn # TODO see if we can use this role instead of PowerBuilder
   role_arn = var.event_role_arn
 
   ecs_target {
