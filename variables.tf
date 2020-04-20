@@ -2,6 +2,10 @@ variable "app_name" {
   type        = string
   description = "Scheduled Fargate Application name."
 }
+variable "schedule_expression" {
+  type        = string
+  description = "When to execute this fargate task. Use 'cron()' or 'rate()'"
+}
 variable "primary_container_definition" {
   type = object({
     name  = string
@@ -22,11 +26,22 @@ variable "task_memory" {
   description = "Memory for the task definition. Defaults to 512."
   default     = 512
 }
-
 variable "task_policies" {
   type        = list(string)
   description = "List of IAM Policy ARNs to attach to the task execution policy."
   default     = []
+}
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID to deploy ECS fargate service."
+}
+variable "private_subnet_ids" {
+  type = list(string)
+}
+variable "ecs_cluster_arn" {
+  type        = string
+  description = "ECS Cluster to place scheduled fargate task(s)"
+  default     = null
 }
 
 variable "role_permissions_boundary_arn" {
