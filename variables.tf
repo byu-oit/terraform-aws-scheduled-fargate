@@ -31,6 +31,16 @@ variable "task_policies" {
   description = "List of IAM Policy ARNs to attach to the task execution policy."
   default     = []
 }
+variable "ecs_cluster_arn" {
+  type        = string
+  description = "ECS Cluster to place scheduled fargate task(s)"
+  default     = null
+}
+variable "event_role_arn" {
+  type = string
+  description = "IAM Role ARN (typically PowerBuilder)"
+}
+
 variable "vpc_id" {
   type        = string
   description = "VPC ID to deploy ECS fargate service."
@@ -38,12 +48,6 @@ variable "vpc_id" {
 variable "private_subnet_ids" {
   type = list(string)
 }
-variable "ecs_cluster_arn" {
-  type        = string
-  description = "ECS Cluster to place scheduled fargate task(s)"
-  default     = null
-}
-
 variable "role_permissions_boundary_arn" {
   type        = string
   description = "IAM Role Permissions Boundary ARN"
