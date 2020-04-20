@@ -29,10 +29,6 @@ module "ecr" {
   name   = "${local.name}-${var.env}"
 }
 
-//data "aws_ecr_repository" "ecr" {
-//  name = "${local.name}-${var.env}"
-//}
-
 module "scheduled_fargate" {
 //    source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
   source = "../../" # for local testing during module development
@@ -47,6 +43,7 @@ module "scheduled_fargate" {
     }
     secrets               = {}
   }
+  task_policies                 = [aws_iam_policy.my_dynamo_policy.arn]
   event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids

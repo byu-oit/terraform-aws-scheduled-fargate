@@ -31,6 +31,11 @@ variable "task_policies" {
   description = "List of IAM Policy ARNs to attach to the task execution policy."
   default     = []
 }
+variable "security_groups" {
+  type        = list(string)
+  description = "List of extra security group IDs to attach to the fargate task."
+  default     = []
+}
 variable "ecs_cluster_arn" {
   type        = string
   description = "ECS Cluster to place scheduled fargate task(s)"
