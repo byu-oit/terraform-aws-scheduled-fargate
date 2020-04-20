@@ -38,12 +38,12 @@ variable "security_groups" {
 }
 variable "ecs_cluster_arn" {
   type        = string
-  description = "ECS Cluster to place scheduled fargate task(s)"
+  description = "ECS Cluster to place scheduled fargate task(s). Defaults to create its own cluster"
   default     = null
 }
 variable "event_role_arn" {
   type        = string
-  description = "IAM Role ARN (typically PowerBuilder)"
+  description = "IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder)"
 }
 
 variable "vpc_id" {
