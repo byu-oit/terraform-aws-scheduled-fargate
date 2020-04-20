@@ -13,7 +13,8 @@ module "<module_name>" {
 ```
 
 ## Requirements
-* Terraform version 0.12.16 or greater
+* Terraform version 0.12.24 or greater
+* AWS provider version 2.58 or greater
 
 ## Inputs
 | Name | Type  | Description | Default |
