@@ -42,6 +42,7 @@ module "test_scheduled_task" {
 | task_cpu | number | CPU for the task definition | 256 |
 | task_memory | number | Memory for the task definition | 512 |
 | task_policies | list(string) | List of IAM Policy ARNs to attach to the task execution IAM Policy| [] |
+| security_groups | list(string) | List of extra security group IDs to attach to the fargate task | []|
 | ecs_cluster_arn | string | | | |
 | event_role_arn | string | | | |
 | vpc_id | string | VPC ID to deploy the ECS fargate service and ALB | |
