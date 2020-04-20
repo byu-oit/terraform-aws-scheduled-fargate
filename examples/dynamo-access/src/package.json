@@ -1,0 +1,24 @@
+{
+  "name": "scheduled-fargate-db-example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.618.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byu-oit/hello-world-docker-api.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/byu-oit/scheduled-fargate-db-example/issues"
+  },
+  "homepage": "https://github.com/byu-oit/scheduled-fargate-db-example#readme"
+}

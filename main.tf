@@ -225,7 +225,7 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
     launch_type         = "FARGATE"
     platform_version    = "LATEST"
     network_configuration {
-      security_groups = [aws_security_group.fargate_service_sg.id]
+      security_groups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
       subnets         = var.private_subnet_ids
     }
   }
