@@ -4,12 +4,12 @@ provider "aws" {
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v2.0.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v2.1.0"
 }
 
 module "scheduled_fargate" {
-    source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v1.0.0"
-//  source = "../" # for local testing during module development
+//    source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
+  source = "../../" # for local testing during module development
 
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
