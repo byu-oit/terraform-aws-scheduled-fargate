@@ -6,7 +6,7 @@ async function fetchDbData ()
   const dynamoParams = { TableName: process.env.DYNAMO_TABLE_NAME }
   try {
     const dynamoData = await dynamodb.scan(dynamoParams).promise()
-    console.log(dynamoData.Count)
+    console.log(`dynamo scan db count: ${dynamoData.Count}`)
     // for (let data of dynamoData.Items) {
     //   console.log(data)
     // }
