@@ -224,7 +224,7 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
     task_count          = 1
     task_definition_arn = aws_ecs_task_definition.task_def.arn
     launch_type         = "FARGATE"
-    platform_version    = "LATEST"
+    platform_version    = "1.4.0" // "LATEST" does not point to 1.4.0 as of 4/21/20
     network_configuration {
       security_groups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
       subnets         = var.private_subnet_ids
