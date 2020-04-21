@@ -8,7 +8,8 @@ module "acs" {
 }
 
 variable "env" {
-  type = string
+  type    = string
+  default = "dev"
 }
 
 variable "image_tag" {
@@ -30,18 +31,19 @@ module "ecr" {
 }
 
 module "scheduled_fargate" {
-//    source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
+  //    source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
   source = "../../" # for local testing during module development
 
-  app_name            = local.name
+  app_name            = "scheduled-fargate-db-example"
+  env                 = var.env
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
-    name                  = "test-dynamo"
-    image                 = "${module.ecr.repository.repository_url}:${var.image_tag}"
+    name  = "test-dynamo"
+    image = "${module.ecr.repository.repository_url}:${var.image_tag}"
     environment_variables = {
       DYNAMO_TABLE_NAME = aws_dynamodb_table.my_dynamo_table.name
     }
-    secrets               = {}
+    secrets = {}
   }
   task_policies                 = [aws_iam_policy.my_dynamo_policy.arn]
   event_role_arn                = module.acs.power_builder_role.arn

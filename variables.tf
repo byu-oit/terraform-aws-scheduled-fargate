@@ -2,6 +2,10 @@ variable "app_name" {
   type        = string
   description = "Scheduled Fargate Application name."
 }
+variable "env" {
+  type        = string
+  description = "Environment (e.g. dev, prd)."
+}
 variable "schedule_expression" {
   type        = string
   description = "When to execute this fargate task. Use 'cron()' or 'rate()'"
@@ -41,11 +45,16 @@ variable "ecs_cluster_arn" {
   description = "ECS Cluster to place scheduled fargate task(s). Defaults to create its own cluster"
   default     = null
 }
+variable "log_retention_in_days" {
+  type        = number
+  description = "The number of days to keep logs in CloudWatch Log Group. Defaults to 7."
+  default     = 7
+}
+// AWS account config variables
 variable "event_role_arn" {
   type        = string
   description = "IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder)"
 }
-
 variable "vpc_id" {
   type        = string
   description = "VPC ID to deploy ECS fargate service."

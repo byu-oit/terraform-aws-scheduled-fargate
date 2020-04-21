@@ -10,7 +10,8 @@ Creates a scheduled Fargate Task in AWS
 module "test_scheduled_task" {
   source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
 
-  app_name            = "test-scheduled-fargate-dev"
+  app_name            = "test-scheduled-fargate"
+  env                 = "dev"
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
     name                  = "test"
@@ -37,6 +38,7 @@ module "test_scheduled_task" {
 | Name | Type  | Description | Default |
 | --- | --- | --- | --- |
 | app_name | string | Application name to name your scheduled Fargate task and other resources | |
+| env | string | Environment (e.g. dev, prd) | |
 | schedule_expression | string | The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). See [AWS Docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html) | |
 | primary_container_definition | [object](#container_definition) | The primary container definition for your application | |
 | task_cpu | number | CPU for the task definition | 256 |
@@ -44,6 +46,7 @@ module "test_scheduled_task" {
 | task_policies | list(string) | List of IAM Policy ARNs to attach to the task execution IAM Policy| [] |
 | security_groups | list(string) | List of extra security group IDs to attach to the fargate task | []|
 | ecs_cluster_arn | string | ECS Cluster to place scheduled fargate task(s). If null is provided, this module creates its own ECS cluster | null |
+| log_retention_in_days | number | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653. | 7 |
 | event_role_arn | string | IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder) | |
 | vpc_id | string | VPC ID to deploy the ECS fargate service and ALB | |
 | private_subnet_ids | list(string) | List of subnet IDs for the fargate service | |
