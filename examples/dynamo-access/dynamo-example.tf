@@ -31,8 +31,8 @@ module "ecr" {
 }
 
 module "scheduled_fargate" {
-  //    source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
-  source = "../../" # for local testing during module development
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
+  // source = "../../" # for local testing during module development
 
   app_name            = "scheduled-fargate-db-example"
   env                 = var.env
