@@ -34,8 +34,7 @@ module "scheduled_fargate" {
   source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v0.1.0"
   // source = "../../" # for local testing during module development
 
-  app_name            = "scheduled-fargate-db-example"
-  env                 = var.env
+  app_name            = "scheduled-fargate-db-example-${var.env}"
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
     name  = "test-dynamo"

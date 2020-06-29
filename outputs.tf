@@ -6,7 +6,7 @@ output "fargate_security_group" {
   value = aws_security_group.fargate_service_sg
 }
 
-output task_definition {
+output "task_definition" {
   value = aws_ecs_task_definition.task_def
 }
 
