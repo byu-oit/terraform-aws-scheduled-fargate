@@ -11,7 +11,7 @@ data "aws_region" "current" {}
 locals {
   create_new_cluster = var.ecs_cluster_name == null
   cluster_name       = local.create_new_cluster ? var.app_name : var.ecs_cluster_name
-  definitions   = [var.primary_container_definition]
+  definitions        = [var.primary_container_definition]
   ssm_parameters = distinct(flatten([
     for def in local.definitions :
     values(def.secrets != null ? def.secrets : {})
