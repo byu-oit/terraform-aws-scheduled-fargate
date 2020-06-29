@@ -2,9 +2,10 @@ variable "app_name" {
   type        = string
   description = "Scheduled Fargate Application name."
 }
-variable "env" {
+variable "ecs_cluster_name" {
   type        = string
-  description = "Environment (e.g. dev, prd)."
+  description = "ECS Cluster name to host the scheduled fargate task. Defaults to creating its own cluster."
+  default     = null
 }
 variable "schedule_expression" {
   type        = string
@@ -39,11 +40,6 @@ variable "security_groups" {
   type        = list(string)
   description = "List of extra security group IDs to attach to the fargate task."
   default     = []
-}
-variable "ecs_cluster_arn" {
-  type        = string
-  description = "ECS Cluster to place scheduled fargate task(s). Defaults to create its own cluster"
-  default     = null
 }
 variable "log_retention_in_days" {
   type        = number
