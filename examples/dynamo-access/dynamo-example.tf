@@ -42,8 +42,8 @@ module "scheduled_fargate" {
     environment_variables = {
       DYNAMO_TABLE_NAME = aws_dynamodb_table.my_dynamo_table.name
     }
-    secrets = {}
-    efs_volume_mounts     = null
+    secrets           = {}
+    efs_volume_mounts = null
   }
   task_policies                 = [aws_iam_policy.my_dynamo_policy.arn]
   event_role_arn                = module.acs.power_builder_role.arn
