@@ -12,6 +12,10 @@ locals {
   create_new_cluster = var.ecs_cluster_name == null
   cluster_name       = local.create_new_cluster ? var.app_name : var.ecs_cluster_name
   definitions        = [var.primary_container_definition]
+  volumes = distinct(flatten([
+    for def in local.definitions :
+    def.efs_volume_mounts != null ? def.efs_volume_mounts : []
+  ]))
   ssm_parameters = distinct(flatten([
     for def in local.definitions :
     values(def.secrets != null ? def.secrets : {})
@@ -53,7 +57,14 @@ locals {
           valueFrom = "${local.ssm_parameter_arn_base}${replace(lookup(def.secrets, key), "/^//", "")}"
         }
       ]
-      mountPoints = []
+      mountPoints = [
+        for mount in(def.efs_volume_mounts != null ? def.efs_volume_mounts : []) :
+        {
+          containerPath = mount.container_path
+          sourceVolume  = mount.name
+          readOnly      = false
+        }
+      ]
       volumesFrom = []
     }
   ]
@@ -144,6 +155,17 @@ resource "aws_ecs_task_definition" "task_def" {
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_role.arn
+
+  dynamic "volume" {
+    for_each = local.volumes
+    content {
+      name = volume.value.name
+      efs_volume_configuration {
+        file_system_id = volume.value.file_system_id
+        root_directory = volume.value.root_directory
+      }
+    }
+  }
 
   tags = var.tags
 }

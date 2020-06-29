@@ -12,7 +12,7 @@ resource "aws_ecs_cluster" "existing" {
 }
 
 module "scheduled_fargate" {
-  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.0.2.0"
+  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
   source = "../../" # for local testing during module development
 
   app_name            = "test-scheduled-fargate-dev"
@@ -23,6 +23,7 @@ module "scheduled_fargate" {
     image                 = "hello-world"
     environment_variables = {}
     secrets               = {}
+    efs_volume_mounts     = null
   }
   event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id

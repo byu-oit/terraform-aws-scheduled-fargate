@@ -1,5 +1,5 @@
 terraform {
-  required_version = "0.12.26"
+  required_version = "0.12.24"
 }
 
 provider "aws" {
@@ -21,6 +21,7 @@ module "scheduled_fargate" {
     image                 = "hello-world"
     environment_variables = {}
     secrets               = {}
+    efs_volume_mounts     = null
   }
   event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id

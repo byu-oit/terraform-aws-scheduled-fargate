@@ -31,7 +31,7 @@ module "ecr" {
 }
 
 module "scheduled_fargate" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.0.2.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
   // source = "../../" # for local testing during module development
 
   app_name            = "scheduled-fargate-db-example-${var.env}"
@@ -43,6 +43,7 @@ module "scheduled_fargate" {
       DYNAMO_TABLE_NAME = aws_dynamodb_table.my_dynamo_table.name
     }
     secrets = {}
+    efs_volume_mounts     = null
   }
   task_policies                 = [aws_iam_policy.my_dynamo_policy.arn]
   event_role_arn                = module.acs.power_builder_role.arn
