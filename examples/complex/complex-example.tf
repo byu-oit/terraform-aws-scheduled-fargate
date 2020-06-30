@@ -35,8 +35,8 @@ output "repo_url" {
 
 // Scheduled fargate
 module "scheduled_fargate" {
-//  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
-   source = "../../" # for local testing during module development
+  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
+  source = "../../" # for local testing during module development
 
   app_name            = local.name
   ecs_cluster_name    = aws_ecr_repository.repo.name
@@ -47,10 +47,10 @@ module "scheduled_fargate" {
     environment_variables = {
       DYNAMO_TABLE_NAME = aws_dynamodb_table.my_dynamo_table.name
     }
-    secrets           = {}
-    efs_volume_mounts     = [
+    secrets = {}
+    efs_volume_mounts = [
       {
-        name = "persistent_data"
+        name           = "persistent_data"
         file_system_id = aws_efs_file_system.my_efs.id
         root_directory = "/"
         container_path = "/usr/app/data"
