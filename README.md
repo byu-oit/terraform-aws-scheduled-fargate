@@ -23,10 +23,6 @@ module "test_scheduled_task" {
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
-
-  tags = {
-    app = "testing-scheduled-fargate"
-  }
 }
 ```
 
@@ -85,6 +81,12 @@ See the following docs for more details:
 * https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_ContainerDefinition.html
 * https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_MountPoint.html
 
+## Examples 
+[complex-example.tf](examples/complex/complex-example.tf)
+* Uses existing ECR repo
+* Connects to DynamoDB table
+* Mounts EFS volume
+
 ## Outputs
 | Name | Type | Description |
 | ---  | ---  | --- |
@@ -94,4 +96,3 @@ See the following docs for more details:
 | event_rule | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_rule.html#attributes-reference) | The CloudWatch Event Rule |
 | event_target | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_target.html#attributes-reference) | The CloudWatch Event Target |
 | log_group | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html#attributes-reference) | The CloudWatch Log Group for the scheduled fargate task |
-
