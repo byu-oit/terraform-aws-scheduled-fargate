@@ -82,7 +82,7 @@ See the following docs for more details:
 * https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_MountPoint.html
 
 ## Examples 
-[complex-example.tf](examples/complex/complex-example.tf)
+[complex-example](examples/complex/)
 * Uses existing ECR repo
 * Connects to DynamoDB table
 * Mounts EFS volume

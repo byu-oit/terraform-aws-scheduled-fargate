@@ -10,7 +10,7 @@ async function run ()
     console.log(`dynamo scan db count: ${dynamoData.Count}`)
 
     fs.mkdirSync('/usr/app/data', {recursive: true})
-    fs.appendFileSync('/usr/app/data/test-efs.txt', Date.now(), 'utf8')
+    fs.appendFileSync('/usr/app/data/test-efs.txt', `scheduled process ran: ${Date.now()}\n`, 'utf8')
     const fileContents = fs.readFileSync('/usr/app/data/test-efs.txt', 'utf8')
     console.log('test-efs.txt file:')
     console.log(fileContents)
