@@ -1,5 +1,9 @@
+terraform {
+  required_version = "0.12.24"
+}
+
 provider "aws" {
-  version = "~> 2.42"
+  version = "~> 2.56"
   region  = "us-west-2"
 }
 
@@ -8,10 +12,9 @@ module "acs" {
 }
 
 module "scheduled_fargate" {
-  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
-  source = "../../" # for local testing during module development
+  source = "../../"
 
-  app_name            = "scheduled-fargate-simple-example-dev"
+  app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
     name                  = "test"
@@ -28,4 +31,29 @@ module "scheduled_fargate" {
   tags = {
     app = "testing-scheduled-fargate"
   }
+}
+
+
+output "scheduled_fargate_ecs_cluster" {
+  value = module.scheduled_fargate.ecs_cluster
+}
+
+output "scheduled_fargate_security_group" {
+  value = module.scheduled_fargate.fargate_security_group
+}
+
+output "scheduled_task_definition" {
+  value = module.scheduled_fargate.task_definition
+}
+
+output "scheduled_event_rule" {
+  value = module.scheduled_fargate.event_rule
+}
+
+output "scheduled_event_target" {
+  value = module.scheduled_fargate.event_target
+}
+
+output "scheduled_log_group" {
+  value = module.scheduled_fargate.log_group
 }

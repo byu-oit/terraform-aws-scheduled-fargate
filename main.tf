@@ -9,8 +9,13 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  resource_name = "${var.app_name}-${var.env}"
-  definitions   = [var.primary_container_definition]
+  create_new_cluster = var.ecs_cluster_name == null
+  cluster_name       = local.create_new_cluster ? var.app_name : var.ecs_cluster_name
+  definitions        = [var.primary_container_definition]
+  volumes = distinct(flatten([
+    for def in local.definitions :
+    def.efs_volume_mounts != null ? def.efs_volume_mounts : []
+  ]))
   ssm_parameters = distinct(flatten([
     for def in local.definitions :
     values(def.secrets != null ? def.secrets : {})
@@ -22,7 +27,7 @@ locals {
     "${local.ssm_parameter_arn_base}${replace(param, "/^//", "")}"
   ]
 
-  cloudwatch_log_group_name = "scheduled-fargate/${local.resource_name}" // CloudWatch Log Group name
+  cloudwatch_log_group_name = "scheduled-fargate/${var.app_name}" // CloudWatch Log Group name
 
   container_definitions = [
     for def in local.definitions : {
@@ -35,7 +40,7 @@ locals {
         options = {
           awslogs-group         = local.cloudwatch_log_group_name
           awslogs-region        = data.aws_region.current.name
-          awslogs-stream-prefix = local.resource_name
+          awslogs-stream-prefix = var.app_name
         }
       }
       environment = [
@@ -52,7 +57,14 @@ locals {
           valueFrom = "${local.ssm_parameter_arn_base}${replace(lookup(def.secrets, key), "/^//", "")}"
         }
       ]
-      mountPoints = []
+      mountPoints = [
+        for mount in(def.efs_volume_mounts != null ? def.efs_volume_mounts : []) :
+        {
+          containerPath = mount.container_path
+          sourceVolume  = mount.name
+          readOnly      = false
+        }
+      ]
       volumesFrom = []
     }
   ]
@@ -72,7 +84,7 @@ data "aws_iam_policy_document" "task_execution_policy" {
   }
 }
 resource "aws_iam_role" "task_execution_role" {
-  name                 = "${local.resource_name}-task-execution-role"
+  name                 = "${var.app_name}-task-execution-role"
   assume_role_policy   = data.aws_iam_policy_document.task_execution_policy.json
   permissions_boundary = var.role_permissions_boundary_arn
   tags                 = var.tags
@@ -97,7 +109,7 @@ data "aws_iam_policy_document" "secrets_access" {
 }
 resource "aws_iam_policy" "secrets_access" {
   count  = local.has_secrets ? 1 : 0
-  name   = "${local.resource_name}-secrets-access"
+  name   = "${var.app_name}-secrets-access"
   policy = data.aws_iam_policy_document.secrets_access[0].json
 }
 resource "aws_iam_role_policy_attachment" "secrets_policy_attach" {
@@ -118,7 +130,7 @@ data "aws_iam_policy_document" "task_policy" {
   }
 }
 resource "aws_iam_role" "task_role" {
-  name                 = "${local.resource_name}-task-role"
+  name                 = "${var.app_name}-task-role"
   assume_role_policy   = data.aws_iam_policy_document.task_policy.json
   permissions_boundary = var.role_permissions_boundary_arn
   tags                 = var.tags
@@ -136,7 +148,7 @@ resource "aws_iam_role_policy_attachment" "secret_task_policy_attach" {
 # --- task definition ---
 resource "aws_ecs_task_definition" "task_def" {
   container_definitions    = jsonencode(local.container_definitions)
-  family                   = "${local.resource_name}-def"
+  family                   = "${var.app_name}-def"
   cpu                      = var.task_cpu
   memory                   = var.task_memory
   network_mode             = "awsvpc"
@@ -144,17 +156,32 @@ resource "aws_ecs_task_definition" "task_def" {
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_role.arn
 
+  dynamic "volume" {
+    for_each = local.volumes
+    content {
+      name = volume.value.name
+      efs_volume_configuration {
+        file_system_id = volume.value.file_system_id
+        root_directory = volume.value.root_directory
+      }
+    }
+  }
+
   tags = var.tags
 }
 
 # ==================== Fargate ====================
-resource "aws_ecs_cluster" "cluster" {
-  count = var.ecs_cluster_arn == null ? 1 : 0
-  name  = local.resource_name
+resource "aws_ecs_cluster" "new_cluster" {
+  count = local.create_new_cluster ? 1 : 0 # if custer is not provided create one
+  name  = local.cluster_name
   tags  = var.tags
 }
+data "aws_ecs_cluster" "existing_cluster" {
+  count        = local.create_new_cluster ? 0 : 1
+  cluster_name = var.ecs_cluster_name
+}
 resource "aws_security_group" "fargate_service_sg" {
-  name        = "${local.resource_name}-fargate-sg"
+  name        = "${var.app_name}-fargate-sg"
   description = "Controls access to the Fargate Service"
   vpc_id      = var.vpc_id
 
@@ -181,7 +208,7 @@ resource "aws_security_group" "fargate_service_sg" {
 //  }
 //}
 //resource "aws_iam_role" "scheduled-task" {
-//  name                 = "${local.resource_name}-scheduled-task-role"
+//  name                 = "${var.app_name}-scheduled-task-role"
 //  assume_role_policy   = data.aws_iam_policy_document.cloudwatch-event-assume-role-policy.json
 //  permissions_boundary = var.role_permissions_boundary_arn
 //  tags                 = var.tags
@@ -200,23 +227,24 @@ resource "aws_security_group" "fargate_service_sg" {
 //  }
 //}
 //resource "aws_iam_policy" "cloudwatch-policy" {
-//  name   = "${local.resource_name}-event-policy"
+//  name   = "${var.app_name}-event-policy"
 //  policy = data.aws_iam_policy_document.event-policy.json
 //}
 //resource "aws_iam_role_policy_attachment" "cloudwatch-event-role-policy-attach" {
 //  policy_arn = aws_iam_policy.cloudwatch-policy.arn
 //  role       = aws_iam_role.scheduled-task.name
 //}
+
 # --- CloudWatch Event Rule ---
 resource "aws_cloudwatch_event_rule" "scheduled_task" {
-  name                = "${local.resource_name}-scheduled-task"
-  description         = "Run ${local.resource_name} task at a scheduled time (${var.schedule_expression})"
+  name                = "${var.app_name}-scheduled-task"
+  description         = "Run ${var.app_name} task at a scheduled time (${var.schedule_expression})"
   schedule_expression = var.schedule_expression
 }
 resource "aws_cloudwatch_event_target" "scheduled_task" {
-  target_id = "${local.resource_name}-scheduled-task-target"
+  target_id = "${var.app_name}-scheduled-task-target"
   rule      = aws_cloudwatch_event_rule.scheduled_task.name
-  arn       = var.ecs_cluster_arn == null ? aws_ecs_cluster.cluster[0].arn : var.ecs_cluster_arn
+  arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : data.aws_ecs_cluster.existing_cluster[0].arn
   //  role_arn  = aws_iam_role.scheduled-task-cloudwatch.arn
   role_arn = var.event_role_arn
 

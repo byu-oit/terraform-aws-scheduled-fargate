@@ -2,9 +2,10 @@ variable "app_name" {
   type        = string
   description = "Scheduled Fargate Application name."
 }
-variable "env" {
+variable "ecs_cluster_name" {
   type        = string
-  description = "Environment (e.g. dev, prd)."
+  description = "ECS Cluster name to host the scheduled fargate task. Defaults to creating its own cluster."
+  default     = null
 }
 variable "schedule_expression" {
   type        = string
@@ -17,8 +18,14 @@ variable "primary_container_definition" {
     //    ports                 = list(number)
     environment_variables = map(string)
     secrets               = map(string)
+    efs_volume_mounts = list(object({
+      name           = string
+      file_system_id = string
+      root_directory = string
+      container_path = string
+    }))
   })
-  description = "The primary container definition for your application. This one will be the only container that receives traffic from the ALB, so make sure the 'ports' field contains the same port as the 'image_port'"
+  description = "The primary container definition for your application."
 }
 variable "task_cpu" {
   type        = number
@@ -39,11 +46,6 @@ variable "security_groups" {
   type        = list(string)
   description = "List of extra security group IDs to attach to the fargate task."
   default     = []
-}
-variable "ecs_cluster_arn" {
-  type        = string
-  description = "ECS Cluster to place scheduled fargate task(s). Defaults to create its own cluster"
-  default     = null
 }
 variable "log_retention_in_days" {
   type        = number
