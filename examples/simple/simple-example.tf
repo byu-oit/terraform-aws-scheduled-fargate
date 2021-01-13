@@ -8,7 +8,7 @@ module "acs" {
 }
 
 module "scheduled_fargate" {
-  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
+  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.0.0"
   source = "../../" # for local testing during module development
 
   app_name            = "scheduled-fargate-simple-example-dev"
@@ -16,6 +16,7 @@ module "scheduled_fargate" {
   primary_container_definition = {
     name                  = "test"
     image                 = "hello-world"
+    command               = null
     environment_variables = {}
     secrets               = {}
     efs_volume_mounts     = null

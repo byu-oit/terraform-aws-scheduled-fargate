@@ -19,6 +19,7 @@ module "scheduled_fargate" {
   primary_container_definition = {
     name                  = "test"
     image                 = "hello-world"
+    command               = null
     environment_variables = {}
     secrets               = {}
     efs_volume_mounts     = null

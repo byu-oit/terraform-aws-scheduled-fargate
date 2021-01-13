@@ -13,8 +13,9 @@ variable "schedule_expression" {
 }
 variable "primary_container_definition" {
   type = object({
-    name  = string
-    image = string
+    name    = string
+    image   = string
+    command = list(string)
     //    ports                 = list(number)
     environment_variables = map(string)
     secrets               = map(string)

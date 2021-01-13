@@ -35,15 +35,16 @@ output "repo_url" {
 
 // Scheduled fargate
 module "scheduled_fargate" {
-  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
+  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.0.0"
   source = "../../" # for local testing during module development
 
   app_name            = local.name
   ecs_cluster_name    = aws_ecr_repository.repo.name
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
-    name  = "test-dynamo"
-    image = "${aws_ecr_repository.repo.repository_url}:${var.image_tag}"
+    name    = "test-dynamo"
+    image   = "${aws_ecr_repository.repo.repository_url}:${var.image_tag}"
+    command = null
     environment_variables = {
       DYNAMO_TABLE_NAME = aws_dynamodb_table.my_dynamo_table.name
     }
