@@ -8,7 +8,7 @@ Creates a scheduled Fargate Task in AWS
 ## Usage
 ```hcl
 module "test_scheduled_task" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v1.0.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.0.0"
 
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"

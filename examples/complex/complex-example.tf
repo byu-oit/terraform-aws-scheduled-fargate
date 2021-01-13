@@ -35,7 +35,7 @@ output "repo_url" {
 
 // Scheduled fargate
 module "scheduled_fargate" {
-  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v.1.0.0"
+  //  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.0.0"
   source = "../../" # for local testing during module development
 
   app_name            = local.name
