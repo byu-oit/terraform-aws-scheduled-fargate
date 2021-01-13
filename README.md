@@ -15,6 +15,7 @@ module "test_scheduled_task" {
   primary_container_definition = {
     name                  = "test"
     image                 = "hello-world"
+    command               = null
     environment_variables = {}
     secrets               = {}
     efs_volume_mounts     = null
@@ -52,6 +53,7 @@ module "test_scheduled_task" {
 Object with following attributes to define the docker container(s) your fargate needs to run.
 * **`name`** - (Required) container name (referenced in CloudWatch logs, and possibly by other containers)
 * **`image`** - (Required) the ecr_image_url with the tag like: `<acct_num>.dkr.ecr.us-west-2.amazonaws.com/myapp:dev` or the image URL from dockerHub or some other docker registry
+* **`command`** - (Required) the [command](https://docs.docker.com/engine/reference/run/#cmd-default-command-or-options) to run the docker container with. Can set to `null` to use the default container command.
 * **`environment_variables`** - (Required) a map of environment variables to pass to the docker container
 * **`secrets`** - (Required) a map of secrets from the parameter store to be assigned to env variables
 * **`efs_volume_mounts`** - (Required) a list of efs_volume_mount [objects](#efs_volume_mount) to be mounted into the container.
