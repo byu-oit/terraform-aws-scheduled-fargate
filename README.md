@@ -8,7 +8,7 @@ Creates a scheduled Fargate Task in AWS
 ## Usage
 ```hcl
 module "test_scheduled_task" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.0.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.1.0"
 
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
@@ -98,3 +98,5 @@ See the following docs for more details:
 | event_rule | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_rule.html#attributes-reference) | The CloudWatch Event Rule |
 | event_target | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_target.html#attributes-reference) | The CloudWatch Event Target |
 | log_group | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html#attributes-reference) | The CloudWatch Log Group for the scheduled fargate task |
+| task_execution_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to launch the Fargate task  |
+| task_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to the scheduled Fargate task |

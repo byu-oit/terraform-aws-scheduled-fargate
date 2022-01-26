@@ -58,3 +58,11 @@ output "scheduled_event_target" {
 output "scheduled_log_group" {
   value = module.scheduled_fargate.log_group
 }
+
+output "task_execution_role" {
+  value = module.scheduled_fargate.task_execution_role
+}
+
+output "task_role" {
+  value = module.scheduled_fargate.task_role
+}

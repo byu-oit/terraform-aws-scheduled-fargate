@@ -21,3 +21,11 @@ output "event_target" {
 output "log_group" {
   value = aws_cloudwatch_log_group.container_log_group
 }
+
+output "task_execution_role" {
+  value = aws_iam_role.task_execution_role
+}
+
+output "task_role" {
+  value = aws_iam_role.task_role
+}
