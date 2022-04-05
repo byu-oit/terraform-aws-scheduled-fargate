@@ -239,9 +239,11 @@ resource "aws_security_group" "fargate_service_sg" {
 # --- CloudWatch Event Rule ---
 resource "aws_cloudwatch_event_rule" "scheduled_task" {
   name                = "${var.app_name}-scheduled-task"
-  description         = "Run ${var.app_name} task at a scheduled time (${var.schedule_expression})"
+  description         = var.schedule_expression != null ? "Run ${var.app_name} task at a scheduled time (${var.schedule_expression})" : "Run ${var.app_name} triggered by an event pattern"
   schedule_expression = var.schedule_expression
+  event_pattern       = var.event_pattern
 }
+
 resource "aws_cloudwatch_event_target" "scheduled_task" {
   target_id = "${var.app_name}-scheduled-task-target"
   rule      = aws_cloudwatch_event_rule.scheduled_task.name

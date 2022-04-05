@@ -8,7 +8,7 @@ Creates a scheduled Fargate Task in AWS
 ## Usage
 ```hcl
 module "test_scheduled_task" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.1.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.2.0"
 
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
@@ -36,7 +36,8 @@ module "test_scheduled_task" {
 | --- | --- | --- | --- |
 | app_name | string | Application name to name your scheduled Fargate task and other resources | |
 | ecs_cluster_name | string | Existing ECS Cluster name to host the fargate server. Defaults to creating its own cluster. | <app_name> |
-| schedule_expression | string | The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). See [AWS Docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html) | |
+| schedule_expression | string | The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). See [AWS Docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html). At least one of `schedule_expression` or `event_pattern` is required. | null |
+| event_pattern | string | The event pattern described a JSON object. See [AWS Docs](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-event-patterns.html). At least one of `schedule_expression` or `event_pattern` is required. | null |
 | primary_container_definition | [object](#container_definition) | The primary container definition for your application | |
 | task_cpu | number | CPU for the task definition | 256 |
 | task_memory | number | Memory for the task definition | 512 |

@@ -2,10 +2,7 @@ name: CI
 
 on:
   pull_request:
-    branches: [master]
-    types: [opened, reopened, synchronize, edited]
-env:
-  tf_version: "0.12.24" # must match value in examples/ci/ci.tf
+    branches: [main]
 
 jobs:
   env:
@@ -18,7 +15,26 @@ jobs:
           matrix='{
             "env":[
               {
-                "tf_working_dir":"./examples/ci",
+                "tf_version":"0.12.24",
+                "tf_working_dir":"./examples/ci-0_12",
+                "aws_key_name":"byu_oit_terraform_dev_key",
+                "aws_secret_name":"byu_oit_terraform_dev_secret"
+              },
+              {
+                "tf_version":"0.13.2",
+                "tf_working_dir":"./examples/ci-0_13",
+                "aws_key_name":"byu_oit_terraform_dev_key",
+                "aws_secret_name":"byu_oit_terraform_dev_secret"
+              },
+              {
+                "tf_version":"0.14.8",
+                "tf_working_dir":"./examples/ci-0_14",
+                "aws_key_name":"byu_oit_terraform_dev_key",
+                "aws_secret_name":"byu_oit_terraform_dev_secret"
+              },
+              {
+                "tf_version":"1.0.0",
+                "tf_working_dir":"./examples/ci-1",
                 "aws_key_name":"byu_oit_terraform_dev_key",
                 "aws_secret_name":"byu_oit_terraform_dev_secret"
               }
@@ -36,7 +52,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.env.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v1
@@ -54,7 +70,7 @@ jobs:
     strategy:
       matrix: ${{ fromJson(needs.env.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -66,7 +82,7 @@ jobs:
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: ${{ env.tf_version }}
+          terraform_version: ${{ matrix.env.tf_version }}
 
       - name: Terraform Init
         working-directory: ${{ matrix.env.tf_working_dir }}
@@ -79,6 +95,15 @@ jobs:
       - name: Comment Plan
         uses: byu-oit/github-action-tf-plan-comment@v1
         with:
+          comment-title: Plan for Terraform v-${{ matrix.env.tf_version }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          working-directory: ${{ matrix.env.tf_working_dir }}
+          terraform-plan-file: plan.tfplan
+
+      - name: Analyze Terraform Plan
+        uses: byu-oit/github-action-tf-plan-analyzer@v2
+        with:
+          divvycloud-username: ${{ secrets.DIVVYCLOUD_USERNAME }}
+          divvycloud-password: ${{ secrets.DIVVYCLOUD_PASSWORD }}
           working-directory: ${{ matrix.env.tf_working_dir }}
           terraform-plan-file: plan.tfplan
