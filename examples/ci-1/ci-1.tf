@@ -57,7 +57,8 @@ output "scheduled_event_rule" {
 }
 
 output "scheduled_event_target" {
-  value = module.scheduled_fargate.event_target
+  value     = module.scheduled_fargate.event_target
+  sensitive = true
 }
 
 output "scheduled_log_group" {
@@ -65,9 +66,11 @@ output "scheduled_log_group" {
 }
 
 output "task_execution_role" {
-  value = module.scheduled_fargate.task_execution_role
+  value     = module.scheduled_fargate.task_execution_role
+  sensitive = true
 }
 
 output "task_role" {
-  value = module.scheduled_fargate.task_role
+  value     = module.scheduled_fargate.task_role
+  sensitive = true
 }
