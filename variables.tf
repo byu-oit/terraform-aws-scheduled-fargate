@@ -9,7 +9,13 @@ variable "ecs_cluster_name" {
 }
 variable "schedule_expression" {
   type        = string
-  description = "When to execute this fargate task. Use 'cron()' or 'rate()'"
+  description = "When to execute this fargate task. Use 'cron()' or 'rate()' At least one of schedule_expression or event_pattern is required."
+  default     = null
+}
+variable "event_pattern" {
+  type        = string
+  description = "The event pattern described a JSON object. At least one of schedule_expression or event_pattern is required."
+  default     = null
 }
 variable "primary_container_definition" {
   type = object({

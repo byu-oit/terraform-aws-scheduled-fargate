@@ -1,5 +1,5 @@
 provider "aws" {
-  version = "~> 2.42"
+  version = ">= 2.42"
   region  = "us-west-2"
 }
 
@@ -7,10 +7,30 @@ module "acs" {
   source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.4.1"
 }
 
+resource "aws_s3_bucket" "test_bucket" {
+  bucket = "event-triggered-fargate-example-dev"
+}
+
+resource "aws_s3_bucket_notification" "notify_eventbridge" {
+  bucket      = aws_s3_bucket.test_bucket.bucket
+  eventbridge = true
+}
+
 module "scheduled_fargate" {
-  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.2.0"
-  app_name            = "scheduled-fargate-simple-example-dev"
-  schedule_expression = "rate(5 minutes)"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.2.0"
+  source        = "../../"
+  app_name      = "event-triggered-fargate-example-dev"
+  event_pattern = <<EOF
+  {
+    "source": ["aws.s3"],
+    "detail-type": ["Object Created"],
+    "detail": {
+      "bucket": {
+        "name": ["${aws_s3_bucket.test_bucket.bucket}"]
+      }
+    }
+  }
+EOF
   primary_container_definition = {
     name                  = "test"
     image                 = "hello-world"
@@ -25,6 +45,6 @@ module "scheduled_fargate" {
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
 
   tags = {
-    app = "testing-scheduled-fargate"
+    app = "testing-event-triggered-fargate"
   }
 }

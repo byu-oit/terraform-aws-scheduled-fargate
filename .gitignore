@@ -4,6 +4,7 @@
 # .tfstate files
 *.tfstate
 *.tfstate.*
+*.lock.hcl
 
 # Crash log files
 crash.log
@@ -17,3 +18,5 @@ override.tf.json
 
 # Ignore jetbrains .idea folder
 .idea
+
+examples/complex/src/node_modules
