@@ -9,8 +9,8 @@ jobs:
     name: Set Env Vars
     runs-on: ubuntu-latest
     steps:
-      - name: Set up DEV Environment Variables
-        if: github.base_ref == 'master'
+      - name: Set up Environment Variables
+        if: github.base_ref == 'main'
         run: |
           matrix='{
             "env":[
@@ -49,15 +49,13 @@ jobs:
     name: Terraform Format
     runs-on: ubuntu-latest
     needs: env
-    strategy:
-      matrix: ${{ fromJson(needs.env.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v3
 
       - name: Terraform Setup
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: ${{ env.tf_version }}
+          terraform_version: 1.0.0
 
       - name: Terraform Format
         working-directory: "./"
@@ -69,6 +67,7 @@ jobs:
     needs: env
     strategy:
       matrix: ${{ fromJson(needs.env.outputs.matrix) }}
+      fail-fast: false
     steps:
       - uses: actions/checkout@v3
 
