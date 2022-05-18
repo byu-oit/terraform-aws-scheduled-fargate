@@ -8,7 +8,7 @@ Creates a scheduled Fargate Task in AWS
 ## Usage
 ```hcl
 module "test_scheduled_task" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.2.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.3.0"
 
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
@@ -32,23 +32,24 @@ module "test_scheduled_task" {
 * AWS provider version 2.58 or greater
 
 ## Inputs
-| Name | Type  | Description | Default |
-| --- | --- | --- | --- |
-| app_name | string | Application name to name your scheduled Fargate task and other resources | |
-| ecs_cluster_name | string | Existing ECS Cluster name to host the fargate server. Defaults to creating its own cluster. | <app_name> |
-| schedule_expression | string | The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). See [AWS Docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html). At least one of `schedule_expression` or `event_pattern` is required. | null |
-| event_pattern | string | The event pattern described a JSON object. See [AWS Docs](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-event-patterns.html). At least one of `schedule_expression` or `event_pattern` is required. | null |
-| primary_container_definition | [object](#container_definition) | The primary container definition for your application | |
-| task_cpu | number | CPU for the task definition | 256 |
-| task_memory | number | Memory for the task definition | 512 |
-| task_policies | list(string) | List of IAM Policy ARNs to attach to the task execution IAM Policy| [] |
-| security_groups | list(string) | List of extra security group IDs to attach to the fargate task | []|
-| log_retention_in_days | number | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653. | 7 |
-| event_role_arn | string | IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder) | |
-| vpc_id | string | VPC ID to deploy the ECS fargate service and ALB | |
-| private_subnet_ids | list(string) | List of subnet IDs for the fargate service | |
-| role_permissions_boundary_arn | string | ARN of the IAM Role permissions boundary to place on each IAM role created | |
-| tags | map(string) | A map of AWS Tags to attach to each resource created | {} |
+| Name                          | Type                            | Description                                                                                                                                                                                                                                           | Default                      |
+|-------------------------------|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
+| app_name                      | string                          | Application name to name your scheduled Fargate task and other resources                                                                                                                                                                              |                              |
+| ecs_cluster_name              | string                          | Existing ECS Cluster name to host the fargate server. Defaults to creating its own cluster.                                                                                                                                                           | <app_name>                   |
+| schedule_expression           | string                          | The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). See [AWS Docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html). At least one of `schedule_expression` or `event_pattern` is required. | null                         |
+| event_pattern                 | string                          | The event pattern described a JSON object. See [AWS Docs](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-event-patterns.html). At least one of `schedule_expression` or `event_pattern` is required.                        | null                         |
+| primary_container_definition  | [object](#container_definition) | The primary container definition for your application                                                                                                                                                                                                 |                              |
+| task_cpu                      | number                          | CPU for the task definition                                                                                                                                                                                                                           | 256                          |
+| task_memory                   | number                          | Memory for the task definition                                                                                                                                                                                                                        | 512                          |
+| task_policies                 | list(string)                    | List of IAM Policy ARNs to attach to the task execution IAM Policy                                                                                                                                                                                    | []                           |
+| security_groups               | list(string)                    | List of extra security group IDs to attach to the fargate task                                                                                                                                                                                        | []                           |
+| log_retention_in_days         | number                          | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.                                                                                          | 7                            |
+| log_group_name                | string                          | The Cloudwatch Log Group name                                                                                                                                                                                                                            |                              |
+| event_role_arn                | string                          | IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder)                                                                                                                                                                              | scheduled-fargate/<app_name> |
+| vpc_id                        | string                          | VPC ID to deploy the ECS fargate service and ALB                                                                                                                                                                                                      |                              |
+| private_subnet_ids            | list(string)                    | List of subnet IDs for the fargate service                                                                                                                                                                                                            |                              |
+| role_permissions_boundary_arn | string                          | ARN of the IAM Role permissions boundary to place on each IAM role created                                                                                                                                                                            |                              |
+| tags                          | map(string)                     | A map of AWS Tags to attach to each resource created                                                                                                                                                                                                  | {}                           |
 
 #### container_definition
 Object with following attributes to define the docker container(s) your fargate needs to run.

@@ -59,6 +59,11 @@ variable "log_retention_in_days" {
   description = "The number of days to keep logs in CloudWatch Log Group. Defaults to 7."
   default     = 7
 }
+variable "log_group_name" {
+  type        = string
+  description = "The Cloudwatch Log Group name."
+  default     = ""
+}
 // AWS account config variables
 variable "event_role_arn" {
   type        = string

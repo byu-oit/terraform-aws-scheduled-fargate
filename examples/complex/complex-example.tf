@@ -4,7 +4,7 @@ provider "aws" {
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.4.1"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
 }
 
 variable "env" {
@@ -35,7 +35,7 @@ output "repo_url" {
 
 // Scheduled fargate
 module "scheduled_fargate" {
-  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.2.0"
+  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.3.0"
   app_name            = local.name
   ecs_cluster_name    = aws_ecr_repository.repo.name
   schedule_expression = "rate(5 minutes)"
