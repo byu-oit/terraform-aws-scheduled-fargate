@@ -1,14 +1,20 @@
 terraform {
-  required_version = "0.12.24"
+  required_version = ">= 0.12"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.0"
+    }
+  }
 }
 
 provider "aws" {
-  version = ">= 2.56"
-  region  = "us-west-2"
+  region = "us-west-2"
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.4.1"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
 }
 
 module "scheduled_fargate" {
@@ -52,7 +58,8 @@ output "scheduled_event_rule" {
 }
 
 output "scheduled_event_target" {
-  value = module.scheduled_fargate.event_target
+  value     = module.scheduled_fargate.event_target
+  sensitive = true
 }
 
 output "scheduled_log_group" {
@@ -60,9 +67,11 @@ output "scheduled_log_group" {
 }
 
 output "task_execution_role" {
-  value = module.scheduled_fargate.task_execution_role
+  value     = module.scheduled_fargate.task_execution_role
+  sensitive = true
 }
 
 output "task_role" {
-  value = module.scheduled_fargate.task_role
+  value     = module.scheduled_fargate.task_role
+  sensitive = true
 }

@@ -4,11 +4,11 @@ provider "aws" {
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.4.1"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
 }
 
 module "scheduled_fargate" {
-  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.2.0"
+  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.3.0"
   app_name            = "scheduled-fargate-simple-example-dev"
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
