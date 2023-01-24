@@ -102,3 +102,40 @@ See the following docs for more details:
 | log_group | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html#attributes-reference) | The CloudWatch Log Group for the scheduled fargate task |
 | task_execution_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to launch the Fargate task  |
 | task_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to the scheduled Fargate task |
+
+## To Run Scheduled Fargate Task Manually
+Sometimes it is desired to run the scheduled fargate task outside its schedule.
+You can run the task manually by running the task definition via the CLI or in the Console.
+This allows for testing your scheduled fargate without having to wait for the appointed scheduled time.
+
+### Run Task Via CLI
+It might be easiest to log into the AWS console and look at the scheduled task in the ECS console to get all the values you need to fill in below. 
+
+1. Log into the AWS account via `aws sso login`
+2. Fill in the appropriate values below:
+   1. `<TASK_DEFINITION>`: the task definition name
+   2. `<ECS_CLUSTER>`: the cluster the scheduled fargate normally runs on
+   3. `<SUBNET_ID>`: needs to be one of the same subnets it normally runs on
+   4. `<SECURITY_GROUP_ID>`: the EC2 security group the scheduled fargate is assigned
+```shell
+aws ecs run-task \
+  --task-definition <TASK_DEFINITION> \
+  --cluster <ECS_CLUSTER> \
+  --network-configuration '{"awsvpcConfiguration":{"subnets":["<subnet-SUBNET_ID>"],"securityGroups":["<sg-SECURITY_GROUP_ID>"],"assignPublicIp":"ENABLED"}}' \
+  --launch-type FARGATE \
+  --propagate-tags TASK_DEFINITION
+```
+**Note:** the `--propagate-tags TASK_DEFINITION` is the actual string, don't replace `TASK_DEFINITION` with the task definition name
+
+### Run Task Via AWS Console
+1. Log into the AWS account
+2. Go to ECS service
+3. Find the Task Definition of the Scheduled Fargate taks
+4. Click "Run Task" under the "Actions" dropdown
+5. Fill out the form
+   1. Launch Type: `FARGATE`
+   2. Cluster: needs to be the same cluster the scheduled fargate runs one normally
+   3. Cluster VPC: needs to be the same VPC it normally runs on
+   4. Subnets: needs to be one of the same subnets it normally runs on
+   5. Propagate tags from: `Task definitions`
+6. Click "Run Task"
