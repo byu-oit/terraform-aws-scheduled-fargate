@@ -35,7 +35,7 @@ output "repo_url" {
 
 // Scheduled fargate
 module "scheduled_fargate" {
-  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.3.0"
+  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.3.1"
   app_name            = local.name
   ecs_cluster_name    = aws_ecr_repository.repo.name
   schedule_expression = "rate(5 minutes)"
