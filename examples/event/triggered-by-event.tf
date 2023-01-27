@@ -1,6 +1,12 @@
-provider "aws" {
-  version = ">= 3.69"
-  region  = "us-west-2"
+terraform {
+  required_version = ">= 1.3"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.69"
+    }
+  }
 }
 
 module "acs" {
@@ -17,7 +23,7 @@ resource "aws_s3_bucket_notification" "notify_eventbridge" {
 }
 
 module "scheduled_fargate" {
-  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.3.1"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.0"
   source        = "../../"
   app_name      = "event-triggered-fargate-example-dev"
   event_pattern = <<EOF
@@ -32,12 +38,8 @@ module "scheduled_fargate" {
   }
 EOF
   primary_container_definition = {
-    name                  = "test"
-    image                 = "hello-world"
-    command               = null
-    environment_variables = {}
-    secrets               = {}
-    efs_volume_mounts     = null
+    name  = "test"
+    image = "hello-world"
   }
   event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
