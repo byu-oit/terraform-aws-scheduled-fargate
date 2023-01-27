@@ -19,18 +19,17 @@ variable "event_pattern" {
 }
 variable "primary_container_definition" {
   type = object({
-    name    = string
-    image   = string
-    command = list(string)
-    //    ports                 = list(number)
-    environment_variables = map(string)
-    secrets               = map(string)
-    efs_volume_mounts = list(object({
+    name                  = string
+    image                 = string
+    command               = optional(list(string))
+    environment_variables = optional(map(string))
+    secrets               = optional(map(string))
+    efs_volume_mounts = optional(list(object({
       name           = string
       file_system_id = string
       root_directory = string
       container_path = string
-    }))
+    })))
   })
   description = "The primary container definition for your application."
 }
@@ -43,6 +42,11 @@ variable "task_memory" {
   type        = number
   description = "Memory for the task definition. Defaults to 512."
   default     = 512
+}
+variable "cpu_architecture" {
+  type        = string
+  description = "CPU architecture for the task definition. Defaults to X86_64."
+  default     = "X86_64"
 }
 variable "task_policies" {
   type        = list(string)
@@ -85,5 +89,5 @@ variable "tags" {
   type        = map(string)
   description = "AWS Tags to attach to AWS resources"
 
-  default = {}
+  default = null
 }

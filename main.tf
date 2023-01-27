@@ -1,7 +1,7 @@
 terraform {
-  required_version = ">= 0.12.24"
+  required_version = ">= 1.3"
   required_providers {
-    aws = ">= 2.58"
+    aws = ">= 3.69"
   }
 }
 
@@ -156,6 +156,10 @@ resource "aws_ecs_task_definition" "task_def" {
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = aws_iam_role.task_execution_role.arn
   task_role_arn            = aws_iam_role.task_role.arn
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = var.cpu_architecture
+  }
 
   dynamic "volume" {
     for_each = local.volumes

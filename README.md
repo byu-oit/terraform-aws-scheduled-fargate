@@ -8,17 +8,13 @@ Creates a scheduled Fargate Task in AWS
 ## Usage
 ```hcl
 module "test_scheduled_task" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v2.3.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.0"
 
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
     name                  = "test"
     image                 = "hello-world"
-    command               = null
-    environment_variables = {}
-    secrets               = {}
-    efs_volume_mounts     = null
   }
   event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
@@ -28,8 +24,8 @@ module "test_scheduled_task" {
 ```
 
 ## Requirements
-* Terraform version 0.12.24 or greater
-* AWS provider version 2.58 or greater
+* Terraform version 1.3 or greater
+* AWS provider version 3.69 or greater
 
 ## Inputs
 | Name                          | Type                            | Description                                                                                                                                                                                                                                           | Default                      |
@@ -41,10 +37,11 @@ module "test_scheduled_task" {
 | primary_container_definition  | [object](#container_definition) | The primary container definition for your application                                                                                                                                                                                                 |                              |
 | task_cpu                      | number                          | CPU for the task definition                                                                                                                                                                                                                           | 256                          |
 | task_memory                   | number                          | Memory for the task definition                                                                                                                                                                                                                        | 512                          |
+| cpu_architecture              | string                          | CPU architecture for the task definition. See [docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#runtime-platform) for options                                                                                                                                                                                        | "X86_64"                     |
 | task_policies                 | list(string)                    | List of IAM Policy ARNs to attach to the task execution IAM Policy                                                                                                                                                                                    | []                           |
 | security_groups               | list(string)                    | List of extra security group IDs to attach to the fargate task                                                                                                                                                                                        | []                           |
 | log_retention_in_days         | number                          | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.                                                                                          | 7                            |
-| log_group_name                | string                          | The Cloudwatch Log Group name                                                                                                                                                                                                                            |                              |
+| log_group_name                | string                          | The Cloudwatch Log Group name                                                                                                                                                                                                                         |                              |
 | event_role_arn                | string                          | IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder)                                                                                                                                                                              | scheduled-fargate/<app_name> |
 | vpc_id                        | string                          | VPC ID to deploy the ECS fargate service and ALB                                                                                                                                                                                                      |                              |
 | private_subnet_ids            | list(string)                    | List of subnet IDs for the fargate service                                                                                                                                                                                                            |                              |
@@ -55,10 +52,10 @@ module "test_scheduled_task" {
 Object with following attributes to define the docker container(s) your fargate needs to run.
 * **`name`** - (Required) container name (referenced in CloudWatch logs, and possibly by other containers)
 * **`image`** - (Required) the ecr_image_url with the tag like: `<acct_num>.dkr.ecr.us-west-2.amazonaws.com/myapp:dev` or the image URL from dockerHub or some other docker registry
-* **`command`** - (Required) the [command](https://docs.docker.com/engine/reference/run/#cmd-default-command-or-options) to run the docker container with. Can set to `null` to use the default container command.
-* **`environment_variables`** - (Required) a map of environment variables to pass to the docker container
-* **`secrets`** - (Required) a map of secrets from the parameter store to be assigned to env variables
-* **`efs_volume_mounts`** - (Required) a list of efs_volume_mount [objects](#efs_volume_mount) to be mounted into the container.
+* **`command`** - the [command](https://docs.docker.com/engine/reference/run/#cmd-default-command-or-options) to run the docker container with. Can omit or set to `null` to use the default container command.
+* **`environment_variables`** - a map of environment variables to pass to the docker container
+* **`secrets`** - a map of secrets from the parameter store to be assigned to env variables
+* **`efs_volume_mounts`** - a list of efs_volume_mount [objects](#efs_volume_mount) to be mounted into the container.
 
 **Before running this configuration** make sure that your ECR repo exists and an image has been pushed to the repo.
 

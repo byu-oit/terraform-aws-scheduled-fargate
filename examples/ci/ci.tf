@@ -1,10 +1,10 @@
 terraform {
-  required_version = ">= 0.12"
+  required_version = ">= 1.3"
 
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 3.69"
     }
   }
 }
@@ -23,12 +23,8 @@ module "scheduled_fargate" {
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
-    name                  = "test"
-    image                 = "hello-world"
-    command               = null
-    environment_variables = {}
-    secrets               = {}
-    efs_volume_mounts     = null
+    name  = "test"
+    image = "hello-world"
   }
   event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
