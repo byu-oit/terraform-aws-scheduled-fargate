@@ -21,6 +21,7 @@ variable "primary_container_definition" {
   type = object({
     name                  = string
     image                 = string
+    entry_point           = optional(list(string))
     command               = optional(list(string))
     environment_variables = optional(map(string))
     secrets               = optional(map(string))
