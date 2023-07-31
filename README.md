@@ -8,7 +8,7 @@ Creates a scheduled Fargate Task in AWS
 ## Usage
 ```hcl
 module "test_scheduled_task" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
 
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
@@ -31,7 +31,7 @@ module "test_scheduled_task" {
 | Name                          | Type                            | Description                                                                                                                                                                                                                                           | Default                      |
 |-------------------------------|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
 | app_name                      | string                          | Application name to name your scheduled Fargate task and other resources                                                                                                                                                                              |                              |
-| ecs_cluster_name              | string                          | Existing ECS Cluster name to host the fargate server. Defaults to creating its own cluster.                                                                                                                                                           | <app_name>                   |
+| ecs_cluster_arn               | string                          | Existing ECS Cluster ARN to host the fargate server. Defaults to creating its own cluster.                                                                                                                                                            |                              |
 | schedule_expression           | string                          | The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). See [AWS Docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html). At least one of `schedule_expression` or `event_pattern` is required. | null                         |
 | event_pattern                 | string                          | The event pattern described a JSON object. See [AWS Docs](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-event-patterns.html). At least one of `schedule_expression` or `event_pattern` is required.                        | null                         |
 | primary_container_definition  | [object](#container_definition) | The primary container definition for your application                                                                                                                                                                                                 |                              |
@@ -90,16 +90,16 @@ See the following docs for more details:
 * Mounts EFS volume
 
 ## Outputs
-| Name | Type | Description |
-| ---  | ---  | --- |
-| ecs_cluster | [object](https://www.terraform.io/docs/providers/aws/r/ecs_cluster.html#attributes-reference) | ECS Cluster (created or pre-existing) the scheduled task is deployed on |
-| fargate_security_group | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference) | Security Group object assigned to the scheduled Fargate task |
-| task_definition | [object](https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#attributes-reference) | The task definition object of the scheduled fargate task |
-| event_rule | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_rule.html#attributes-reference) | The CloudWatch Event Rule |
-| event_target | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_target.html#attributes-reference) | The CloudWatch Event Target |
-| log_group | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html#attributes-reference) | The CloudWatch Log Group for the scheduled fargate task |
-| task_execution_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to launch the Fargate task  |
-| task_role | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to the scheduled Fargate task |
+| Name                   | Type                                                                                                                | Description                                                                                                                                                     |
+|------------------------|---------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ecs_cluster            | [object](https://www.terraform.io/docs/providers/aws/r/ecs_cluster.html#attributes-reference)                       | ECS Cluster the scheduled task is deployed on, if var.ecs_cluster_arn is provided this will only return an object with the arn `{ arn : var.ecs_cluster_arn }`  |
+| fargate_security_group | [object](https://www.terraform.io/docs/providers/aws/r/security_group.html#attributes-reference)                    | Security Group object assigned to the scheduled Fargate task                                                                                                    |
+| task_definition        | [object](https://www.terraform.io/docs/providers/aws/r/ecs_task_definition.html#attributes-reference)               | The task definition object of the scheduled fargate task                                                                                                        |
+| event_rule             | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_rule.html#attributes-reference)             | The CloudWatch Event Rule                                                                                                                                       |
+| event_target           | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_event_target.html#attributes-reference)           | The CloudWatch Event Target                                                                                                                                     |
+| log_group              | [object](https://www.terraform.io/docs/providers/aws/r/cloudwatch_log_group.html#attributes-reference)              | The CloudWatch Log Group for the scheduled fargate task                                                                                                         |
+| task_execution_role    | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to launch the Fargate task                                                                                                                |
+| task_role              | [object](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role#attributes-reference) | The IAM role assigned to the scheduled Fargate task                                                                                                             |
 
 ## To Run Scheduled Fargate Task Manually
 Sometimes it is desired to run the scheduled fargate task outside its schedule.

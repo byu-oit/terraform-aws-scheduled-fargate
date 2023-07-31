@@ -2,9 +2,9 @@ variable "app_name" {
   type        = string
   description = "Scheduled Fargate Application name."
 }
-variable "ecs_cluster_name" {
+variable "ecs_cluster_arn" {
   type        = string
-  description = "ECS Cluster name to host the scheduled fargate task. Defaults to creating its own cluster."
+  description = "ECS Cluster ARN to host the scheduled fargate task. Defaults to creating its own cluster."
   default     = null
 }
 variable "schedule_expression" {

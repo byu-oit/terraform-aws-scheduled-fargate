@@ -9,8 +9,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  create_new_cluster = var.ecs_cluster_name == null
-  cluster_name       = local.create_new_cluster ? var.app_name : var.ecs_cluster_name
+  create_new_cluster = var.ecs_cluster_arn == null
   definitions        = [var.primary_container_definition]
   volumes = distinct(flatten([
     for def in local.definitions :
@@ -179,12 +178,8 @@ resource "aws_ecs_task_definition" "task_def" {
 # ==================== Fargate ====================
 resource "aws_ecs_cluster" "new_cluster" {
   count = local.create_new_cluster ? 1 : 0 # if custer is not provided create one
-  name  = local.cluster_name
+  name  = var.app_name
   tags  = var.tags
-}
-data "aws_ecs_cluster" "existing_cluster" {
-  count        = local.create_new_cluster ? 0 : 1
-  cluster_name = var.ecs_cluster_name
 }
 resource "aws_security_group" "fargate_service_sg" {
   name        = "${var.app_name}-fargate-sg"
@@ -252,7 +247,7 @@ resource "aws_cloudwatch_event_rule" "scheduled_task" {
 resource "aws_cloudwatch_event_target" "scheduled_task" {
   target_id = "${var.app_name}-scheduled-task-target"
   rule      = aws_cloudwatch_event_rule.scheduled_task.name
-  arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : data.aws_ecs_cluster.existing_cluster[0].arn
+  arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.ecs_cluster_arn
   //  role_arn  = aws_iam_role.scheduled-task-cloudwatch.arn
   role_arn = var.event_role_arn
 

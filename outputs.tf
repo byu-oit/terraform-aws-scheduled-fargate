@@ -1,5 +1,5 @@
 output "ecs_cluster" {
-  value = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0] : data.aws_ecs_cluster.existing_cluster[0]
+  value = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0] : { arn : var.ecs_cluster_arn }
 }
 
 output "fargate_security_group" {
