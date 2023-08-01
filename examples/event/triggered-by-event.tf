@@ -4,13 +4,17 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 resource "aws_s3_bucket" "test_bucket" {

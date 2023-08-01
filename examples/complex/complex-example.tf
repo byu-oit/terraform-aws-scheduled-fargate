@@ -4,13 +4,18 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
+
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 variable "env" {
@@ -31,6 +36,9 @@ locals {
   }
 }
 
+resource "aws_ecs_cluster" "existing" {
+  name = "test-existing-cluster"
+}
 resource "aws_ecr_repository" "repo" {
   name = "test-existing-ecr"
 }
@@ -42,9 +50,11 @@ output "repo_url" {
 // Scheduled fargate
 module "scheduled_fargate" {
   #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
-  source              = "../../"
-  app_name            = local.name
-  ecs_cluster_arn     = aws_ecr_repository.repo.arn
+  source   = "../../"
+  app_name = local.name
+  existing_ecs_cluster = {
+    arn = aws_ecs_cluster.existing.arn
+  }
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
     name  = "test-dynamo"
@@ -128,7 +138,7 @@ resource "aws_security_group" "efs_sg" {
 }
 
 resource "aws_efs_mount_target" "efs_target" {
-  for_each = toset(module.acs.private_subnet_ids)
+  for_each = nonsensitive(toset(module.acs.private_subnet_ids))
 
   file_system_id  = aws_efs_file_system.my_efs.id
   subnet_id       = each.key

@@ -1,7 +1,7 @@
 terraform {
   required_version = ">= 1.3"
   required_providers {
-    aws = ">= 3.69"
+    aws = ">= 4.0"
   }
 }
 
@@ -9,7 +9,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  create_new_cluster = var.ecs_cluster_arn == null
+  create_new_cluster = !var.existing_ecs_cluster.use_existing
   definitions        = [var.primary_container_definition]
   volumes = distinct(flatten([
     for def in local.definitions :
@@ -247,7 +247,7 @@ resource "aws_cloudwatch_event_rule" "scheduled_task" {
 resource "aws_cloudwatch_event_target" "scheduled_task" {
   target_id = "${var.app_name}-scheduled-task-target"
   rule      = aws_cloudwatch_event_rule.scheduled_task.name
-  arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.ecs_cluster_arn
+  arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
   //  role_arn  = aws_iam_role.scheduled-task-cloudwatch.arn
   role_arn = var.event_role_arn
 
