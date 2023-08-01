@@ -4,16 +4,10 @@ variable "app_name" {
 }
 variable "existing_ecs_cluster" {
   type = object({
-    use_existing = optional(bool, true)
-    arn          = optional(string)
+    arn = string
   })
-  default = {
-    use_existing = false
-  }
-  validation {
-    condition     = !var.existing_ecs_cluster.use_existing || var.existing_ecs_cluster.arn != null
-    error_message = "existing_ecs_cluster.arn is required if the existing_ecs_cluster.use_existing is set to true"
-  }
+  description = "Existing ECS Cluster configuration to host the fargate scheduled task. Defaults to creating its own cluster."
+  default     = null
 }
 variable "schedule_expression" {
   type        = string

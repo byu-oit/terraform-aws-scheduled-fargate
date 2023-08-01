@@ -31,7 +31,7 @@ module "test_scheduled_task" {
 | Name                          | Type                            | Description                                                                                                                                                                                                                                           | Default                      |
 |-------------------------------|---------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------|
 | app_name                      | string                          | Application name to name your scheduled Fargate task and other resources                                                                                                                                                                              |                              |
-| existing_ecs_cluster          | [object](#existing_ecs_cluster) | Existing ECS Cluster configuration to host the fargate server. Defaults to creating its own cluster.                                                                                                                                                  | { use_existing = false }     |
+| existing_ecs_cluster          | [object](#existing_ecs_cluster) | Existing ECS Cluster configuration to host the fargate scheduled task. Defaults to creating its own cluster.                                                                                                                                          |                              |
 | schedule_expression           | string                          | The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). See [AWS Docs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html). At least one of `schedule_expression` or `event_pattern` is required. | null                         |
 | event_pattern                 | string                          | The event pattern described a JSON object. See [AWS Docs](https://docs.aws.amazon.com/eventbridge/latest/userguide/eventbridge-and-event-patterns.html). At least one of `schedule_expression` or `event_pattern` is required.                        | null                         |
 | primary_container_definition  | [object](#container_definition) | The primary container definition for your application                                                                                                                                                                                                 |                              |
@@ -50,8 +50,7 @@ module "test_scheduled_task" {
 
 #### existing_ecs_cluster
 Object with following attributes to define an existing ECS cluster to deploy the fargate tasks.
-* **`use_existing`** - boolean to determine if this module will use an existing ECS cluster or create its own (defaults to true if this variable is defined)
-* **`arn`** - (Required if `use_existing` is true) string of the ARN of the existing ECS cluster
+* **`arn`** - (Required) string of the ARN of the existing ECS cluster
 
 If you want to deploy this scheduled fargate task onto an existing cluster you would need to define this variable. For example:
 ```hcl
