@@ -37,8 +37,8 @@ module "scheduled_fargate" {
 }
 
 
-output "scheduled_fargate_ecs_cluster" {
-  value = module.scheduled_fargate.ecs_cluster
+output "scheduled_fargate_new_ecs_cluster" {
+  value = module.scheduled_fargate.new_ecs_cluster
 }
 
 output "scheduled_fargate_security_group" {
