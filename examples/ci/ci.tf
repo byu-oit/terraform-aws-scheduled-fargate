@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
@@ -14,12 +14,12 @@ provider "aws" {
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 module "scheduled_fargate" {
-  source = "../../"
-
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  source              = "../../"
   app_name            = "test-scheduled-fargate-dev"
   schedule_expression = "rate(5 minutes)"
   primary_container_definition = {
@@ -37,8 +37,8 @@ module "scheduled_fargate" {
 }
 
 
-output "scheduled_fargate_ecs_cluster" {
-  value = module.scheduled_fargate.ecs_cluster
+output "scheduled_fargate_new_ecs_cluster" {
+  value = module.scheduled_fargate.new_ecs_cluster
 }
 
 output "scheduled_fargate_security_group" {
