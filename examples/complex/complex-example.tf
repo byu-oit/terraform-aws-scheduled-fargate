@@ -72,7 +72,6 @@ module "scheduled_fargate" {
     ]
   }
   task_policies                 = [aws_iam_policy.my_dynamo_policy.arn]
-  event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn

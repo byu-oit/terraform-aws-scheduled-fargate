@@ -26,7 +26,6 @@ module "scheduled_fargate" {
     name  = "test"
     image = "hello-world"
   }
-  event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
@@ -35,7 +34,6 @@ module "scheduled_fargate" {
     app = "testing-scheduled-fargate"
   }
 }
-
 
 output "scheduled_fargate_new_ecs_cluster" {
   value = module.scheduled_fargate.new_ecs_cluster
