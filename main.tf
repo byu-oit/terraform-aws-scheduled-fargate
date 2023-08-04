@@ -196,45 +196,48 @@ resource "aws_security_group" "fargate_service_sg" {
 }
 
 # ==================== Cloudwatch Event ====================
-# --- CloudWatch Event IAM Role --- TODO see if we can use this role instead of PowerBuilder
-//data "aws_iam_policy_document" "cloudwatch-event-assume-role-policy" {
-//  version = "2012-10-17"
-//  statement {
-//    effect  = "Allow"
-//    actions = ["sts:AssumeRole"]
-//    principals {
-//      identifiers = ["events.amazonaws.com"]
-//      type        = "Service"
-//    }
-//  }
-//}
-//resource "aws_iam_role" "scheduled-task" {
-//  name                 = "${var.app_name}-scheduled-task-role"
-//  assume_role_policy   = data.aws_iam_policy_document.cloudwatch-event-assume-role-policy.json
-//  permissions_boundary = var.role_permissions_boundary_arn
-//  tags                 = var.tags
-//}
-//data "aws_iam_policy_document" "event-policy" {
-//  version = "2012-10-17"
-//  statement {
-//    effect    = "Allow"
-//    actions   = ["ecs:runTask"]
-//    resources = ["*"]
-//  }
-//  statement {
-//    effect    = "Allow"
-//    actions   = ["iam:PassRole"]
-//    resources = [aws_iam_role.task_execution_role.arn, aws_iam_role.task_role.arn]
-//  }
-//}
-//resource "aws_iam_policy" "cloudwatch-policy" {
-//  name   = "${var.app_name}-event-policy"
-//  policy = data.aws_iam_policy_document.event-policy.json
-//}
-//resource "aws_iam_role_policy_attachment" "cloudwatch-event-role-policy-attach" {
-//  policy_arn = aws_iam_policy.cloudwatch-policy.arn
-//  role       = aws_iam_role.scheduled-task.name
-//}
+# --- CloudWatch Event IAM Role ---
+data "aws_iam_policy_document" "cloudwatch-event-assume-role-policy" {
+  version = "2012-10-17"
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      identifiers = ["events.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_iam_role" "scheduled-event" {
+  name                 = "${var.app_name}-cloudwatch-scheduled-event"
+  assume_role_policy   = data.aws_iam_policy_document.cloudwatch-event-assume-role-policy.json
+  permissions_boundary = var.role_permissions_boundary_arn
+  tags                 = var.tags
+}
+data "aws_iam_policy_document" "event-policy" {
+  version = "2012-10-17"
+  statement {
+    # Allow the Cloudwatch Event Rule to run the ECS task
+    effect    = "Allow"
+    actions   = ["ecs:runTask"]
+    resources = [aws_ecs_task_definition.task_def.arn]
+  }
+  statement {
+    # Allow the Cloudwatch Event Rule to pass the task roles to the started ECS task
+    effect    = "Allow"
+    actions   = ["iam:PassRole"]
+    resources = [aws_iam_role.task_execution_role.arn, aws_iam_role.task_role.arn]
+  }
+}
+resource "aws_iam_policy" "run-scheduled-task" {
+  name   = "${var.app_name}-run-scheduled-task"
+  policy = data.aws_iam_policy_document.event-policy.json
+}
+resource "aws_iam_role_policy_attachment" "cloudwatch-event-role-policy-attach" {
+  policy_arn = aws_iam_policy.run-scheduled-task.arn
+  role       = aws_iam_role.scheduled-event.name
+}
 
 # --- CloudWatch Event Rule ---
 resource "aws_cloudwatch_event_rule" "scheduled_task" {
@@ -248,8 +251,7 @@ resource "aws_cloudwatch_event_target" "scheduled_task" {
   target_id = "${var.app_name}-scheduled-task-target"
   rule      = aws_cloudwatch_event_rule.scheduled_task.name
   arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
-  //  role_arn  = aws_iam_role.scheduled-task-cloudwatch.arn
-  role_arn = var.event_role_arn
+  role_arn  = aws_iam_role.scheduled-event.arn
 
   ecs_target {
     task_count          = 1

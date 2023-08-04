@@ -71,11 +71,6 @@ variable "log_group_name" {
   description = "The Cloudwatch Log Group name."
   default     = ""
 }
-// AWS account config variables
-variable "event_role_arn" {
-  type        = string
-  description = "IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder)"
-}
 variable "vpc_id" {
   type        = string
   description = "VPC ID to deploy ECS fargate service."

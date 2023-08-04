@@ -16,7 +16,6 @@ module "test_scheduled_task" {
       name  = "test"
       image = "hello-world"
    }
-   event_role_arn                = module.acs.power_builder_role.arn
    vpc_id                        = module.acs.vpc.id
    private_subnet_ids            = module.acs.private_subnet_ids
    role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
@@ -42,7 +41,6 @@ module "test_scheduled_task" {
 | security_groups               | list(string)                    | List of extra security group IDs to attach to the fargate task                                                                                                                                                                                        | []                           |
 | log_retention_in_days         | number                          | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.                                                                                          | 7                            |
 | log_group_name                | string                          | The Cloudwatch Log Group name                                                                                                                                                                                                                         |                              |
-| event_role_arn                | string                          | IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder)                                                                                                                                                                              | scheduled-fargate/<app_name> |
 | vpc_id                        | string                          | VPC ID to deploy the ECS fargate service and ALB                                                                                                                                                                                                      |                              |
 | private_subnet_ids            | list(string)                    | List of subnet IDs for the fargate service                                                                                                                                                                                                            |                              |
 | role_permissions_boundary_arn | string                          | ARN of the IAM Role permissions boundary to place on each IAM role created                                                                                                                                                                            |                              |
