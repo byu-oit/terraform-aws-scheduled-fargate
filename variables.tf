@@ -11,12 +11,26 @@ variable "existing_ecs_cluster" {
 }
 variable "schedule_expression" {
   type        = string
-  description = "When to execute this fargate task. Use 'cron()' or 'rate()' At least one of schedule_expression or event_pattern is required."
+  description = "When to execute this fargate task. Use 'cron()', 'rate()', or 'at()'."
+}
+variable "schedule_expression_timezone" {
+  type        = string
+  description = "Timezone for the scheduled expression. Defaults to America/Denver."
+  default     = "America/Denver"
+}
+variable "start_date" {
+  type        = string
+  description = "The timestamp (ISO format UTC time zone), after which the scheduled task will begin following the schedule_expression."
   default     = null
 }
-variable "event_pattern" {
+variable "end_date" {
   type        = string
-  description = "The event pattern described a JSON object. At least one of schedule_expression or event_pattern is required."
+  description = "The timestampe (ISO format UTC time zone) when the scheduled task will stop being invoked."
+  default     = null
+}
+variable "schedule_group_name" {
+  type        = string
+  description = "Existing EventBridge Scheduler Schedule Group name to group related scheduled tasks in the CloudWatch Scheduler. Defaults to the default group in every AWS account."
   default     = null
 }
 variable "primary_container_definition" {

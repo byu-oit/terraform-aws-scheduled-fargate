@@ -3,19 +3,16 @@ output "new_ecs_cluster" {
 }
 
 output "fargate_security_group" {
-  value = aws_security_group.fargate_service_sg
+  value = aws_security_group.fargate_sg
 }
 
 output "task_definition" {
   value = aws_ecs_task_definition.task_def
 }
 
-output "event_rule" {
-  value = aws_cloudwatch_event_rule.scheduled_task
-}
-
-output "event_target" {
-  value = aws_cloudwatch_event_target.scheduled_task
+output "schedule" {
+  value     = aws_scheduler_schedule.schedule
+  sensitive = true
 }
 
 output "log_group" {
