@@ -40,12 +40,14 @@ Chosen option: "Use EventBridge Scheduler (move event trigger functionality to n
 * Good, because we can take advantage of the EventBridge Scheduler features (time zone, start-end dates, retries etc.)
 * Good, because we can still support tasks triggered by tasks
 * Bad, because the module will be more complex (it will include resources for both EventBridge Scheduler, and CloudWatch Rules and Targets)
+* Bad, because using the Scheduler removes the task from the list of "Scheduled Tasks" in the ECS cluster
 
 ### Use EventBridge Scheduler (move event trigger functionality to new module)
 
 * Good, because we can take advantage of the EventBridge Scheduler features (time zone, start-end dates, retries etc.)
 * Good, because this module will be simplified
 * Bad, because in order to support tasks triggered by tasks we'll need to create a new module (with lots of copy/paste terraform configuration)
+* Bad, because using the Scheduler removes the task from the list of "Scheduled Tasks" in the ECS cluster
 
 ### Use EventBridge Scheduler and refactor fargate modules
 
@@ -60,6 +62,7 @@ Maybe something like:
 * Good, because our modules can be smaller and simpler, thus easier to maintain
 * Bad, because it completely breaks our exising terraform module contract, so upgrades will be more difficult
 * Bad, because it makes our apps a little more complex having to use interconnected modules instead of just one. It borders on not needing modules in the first place if our apps have to know how everything integrates.
+* Bad, because using the Scheduler removes the task from the list of "Scheduled Tasks" in the ECS cluster
 
 ## Links <!-- optional -->
 
