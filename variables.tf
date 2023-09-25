@@ -36,7 +36,7 @@ variable "schedule_group_name" {
 }
 variable "event_pattern" {
   type        = string
-  description = "The event pattern described a JSON object. At least one of schedule_expression or event_pattern is required."
+  description = "The event pattern described as a JSON object. At least one of schedule_expression or event_pattern is required."
   default     = null
 }
 variable "primary_container_definition" {
