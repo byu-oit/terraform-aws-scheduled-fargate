@@ -11,7 +11,7 @@ variable "existing_ecs_cluster" {
 }
 variable "schedule_expression" {
   type        = string
-  description = "When to execute this fargate task. Use 'cron()', 'rate()', or 'at()'."
+  description = "When to execute this fargate task. Use 'cron()', 'rate()', or 'at()'. At least one of schedule_expression or event_pattern is required."
   default     = null
 }
 variable "schedule_expression_timezone" {
@@ -26,7 +26,7 @@ variable "start_date" {
 }
 variable "end_date" {
   type        = string
-  description = "The timestampe (ISO format UTC time zone) when the scheduled task will stop being invoked. If null or not provided, then this schedule is effective forever. Defaults to null."
+  description = "The timestamp (ISO format UTC time zone) when the scheduled task will stop being invoked. If null or not provided, then this schedule is effective forever. Defaults to null."
   default     = null
 }
 variable "schedule_group_name" {
