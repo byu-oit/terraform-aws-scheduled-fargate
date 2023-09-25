@@ -20,12 +20,12 @@ variable "schedule_expression_timezone" {
 }
 variable "start_date" {
   type        = string
-  description = "The timestamp (ISO format UTC time zone), after which the scheduled task will begin following the schedule_expression."
+  description = "The timestamp (ISO format UTC time zone), after which the scheduled task will begin following the schedule_expression. If null or not provided, then this schedule is effective immediately. Defaults to null."
   default     = null
 }
 variable "end_date" {
   type        = string
-  description = "The timestampe (ISO format UTC time zone) when the scheduled task will stop being invoked."
+  description = "The timestampe (ISO format UTC time zone) when the scheduled task will stop being invoked. If null or not provided, then this schedule is effective forever. Defaults to null."
   default     = null
 }
 variable "schedule_group_name" {
