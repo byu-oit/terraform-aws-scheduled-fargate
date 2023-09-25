@@ -9,6 +9,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
+  use_scheduler      = var.schedule_expression != null
+  use_event_rule     = var.event_pattern != null
   create_new_cluster = var.existing_ecs_cluster == null
   definitions        = [var.primary_container_definition]
   volumes = distinct(flatten([
@@ -195,23 +197,26 @@ resource "aws_security_group" "fargate_sg" {
   tags = var.tags
 }
 
-# ==================== Cloudwatch EventBridge Scheduler ====================
+# ==================== Cloudwatch EventBridge ====================
 # --- CloudWatch Event IAM Role ---
-data "aws_iam_policy_document" "scheduler_assume_role_policy" {
+data "aws_iam_policy_document" "assume_role_policy" {
   version = "2012-10-17"
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
     principals {
-      identifiers = ["scheduler.amazonaws.com"]
-      type        = "Service"
+      identifiers = compact([
+        local.use_scheduler ? "scheduler.amazonaws.com" : null,
+        local.use_event_rule ? "events.amazonaws.com" : null
+      ])
+      type = "Service"
     }
   }
 }
 
-resource "aws_iam_role" "scheduler" {
-  name                 = "${var.app_name}-scheduler"
-  assume_role_policy   = data.aws_iam_policy_document.scheduler_assume_role_policy.json
+resource "aws_iam_role" "trigger" {
+  name                 = "${var.app_name}-trigger"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_policy.json
   permissions_boundary = var.role_permissions_boundary_arn
   tags                 = var.tags
 }
@@ -234,13 +239,14 @@ resource "aws_iam_policy" "run_task" {
   name   = "${var.app_name}-run-task"
   policy = data.aws_iam_policy_document.run_task_policy.json
 }
-resource "aws_iam_role_policy_attachment" "run_task_policy_to_scheduler_role" {
+resource "aws_iam_role_policy_attachment" "run_task_policy_to_trigger_role" {
   policy_arn = aws_iam_policy.run_task.arn
-  role       = aws_iam_role.scheduler.name
+  role       = aws_iam_role.trigger.name
 }
 
 # --- EventBridge Scheduler ---
 resource "aws_scheduler_schedule" "schedule" {
+  count                        = local.use_scheduler ? 1 : 0
   name                         = "${var.app_name}-schedule"
   description                  = "Run ${var.app_name} task with the schedule: ${var.schedule_expression}"
   schedule_expression          = var.schedule_expression
@@ -254,7 +260,7 @@ resource "aws_scheduler_schedule" "schedule" {
 
   target {
     arn      = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
-    role_arn = aws_iam_role.scheduler.arn
+    role_arn = aws_iam_role.trigger.arn
     ecs_parameters {
       task_count          = 1
       task_definition_arn = aws_ecs_task_definition.task_def.arn
@@ -263,6 +269,32 @@ resource "aws_scheduler_schedule" "schedule" {
         security_groups = concat([aws_security_group.fargate_sg.id], var.security_groups)
         subnets         = var.private_subnet_ids
       }
+    }
+  }
+}
+
+# --- EventBridge Event Trigger ---
+resource "aws_cloudwatch_event_rule" "event_trigger" {
+  count         = local.use_event_rule ? 1 : 0
+  name          = "${var.app_name}-event-rule"
+  description   = "Run ${var.app_name} triggered by an event pattern"
+  event_pattern = var.event_pattern
+}
+
+resource "aws_cloudwatch_event_target" "event_target" {
+  count     = local.use_event_rule ? 1 : 0
+  target_id = "${var.app_name}-event-target"
+  rule      = aws_cloudwatch_event_rule.event_trigger[0].name
+  arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
+  role_arn  = aws_iam_role.trigger.arn
+
+  ecs_target {
+    task_count          = 1
+    task_definition_arn = aws_ecs_task_definition.task_def.arn
+    launch_type         = "FARGATE"
+    network_configuration {
+      security_groups = concat([aws_security_group.fargate_sg.id], var.security_groups)
+      subnets         = var.private_subnet_ids
     }
   }
 }

@@ -11,8 +11,16 @@ output "task_definition" {
 }
 
 output "schedule" {
-  value     = aws_scheduler_schedule.schedule
+  value     = local.use_scheduler ? aws_scheduler_schedule.schedule[0] : null
   sensitive = true
+}
+
+output "event_rule" {
+  value = local.use_event_rule ? aws_cloudwatch_event_rule.event_trigger[0] : null
+}
+
+output "event_target" {
+  value = local.use_event_rule ? aws_cloudwatch_event_target.event_target[0] : null
 }
 
 output "log_group" {
