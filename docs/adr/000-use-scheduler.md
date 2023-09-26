@@ -1,9 +1,12 @@
 # Use EventBridge Scheduler to Trigger Scheduled Fargate Tasks
 
 * Status: accepted
-* Deciders: Cloud Guild
-  * // TODO
-* Date: 2023-09-22
+* Deciders:
+  * Jamie Visker
+  * Josh Gubler
+  * Scott Hutchings
+  * Spencer Visker
+* Date: 2023-09-26
 
 ## Context and Problem Statement
 
@@ -25,7 +28,15 @@ Do we start using the Scheduler to take advantage of those newer features?
 
 ## Decision Outcome
 
-Chosen option: "Use EventBridge Scheduler (move event trigger functionality to new module)", because triggering a Fargate task off of an event doesn't quite fit with the name of this module "terraform-aws-scheduled-fargate."
+Chosen option: "Use EventBridge Scheduler (keep event trigger functionality)", because it'll give us the best of both worlds with using the new Scheduler and still supporting events.
+
+### Positive Consequences <!-- optional -->
+
+* We were able to implement in such a way that a fargate task can be both scheduled and triggered by an event with the same module.
+
+### Negative Consequences <!-- optional -->
+
+* Using the Scheduler removes the fargate task from the "Scheduled tasks" portion of the ECS cluster on the AWS console.
 
 ## Pros and Cons of the Options <!-- optional -->
 
