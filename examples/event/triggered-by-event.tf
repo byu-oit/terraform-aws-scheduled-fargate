@@ -48,8 +48,4 @@ EOF
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
-
-  tags = {
-    app = "testing-event-triggered-fargate"
-  }
 }

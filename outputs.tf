@@ -3,19 +3,24 @@ output "new_ecs_cluster" {
 }
 
 output "fargate_security_group" {
-  value = aws_security_group.fargate_service_sg
+  value = aws_security_group.fargate_sg
 }
 
 output "task_definition" {
   value = aws_ecs_task_definition.task_def
 }
 
+output "schedule" {
+  value     = local.use_scheduler ? aws_scheduler_schedule.schedule[0] : null
+  sensitive = true
+}
+
 output "event_rule" {
-  value = aws_cloudwatch_event_rule.scheduled_task
+  value = local.use_event_rule ? aws_cloudwatch_event_rule.event_trigger[0] : null
 }
 
 output "event_target" {
-  value = aws_cloudwatch_event_target.scheduled_task
+  value = local.use_event_rule ? aws_cloudwatch_event_target.event_target[0] : null
 }
 
 output "log_group" {

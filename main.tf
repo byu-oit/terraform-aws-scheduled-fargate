@@ -9,6 +9,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
+  use_scheduler      = var.schedule_expression != null
+  use_event_rule     = var.event_pattern != null
   create_new_cluster = var.existing_ecs_cluster == null
   definitions        = [var.primary_container_definition]
   volumes = distinct(flatten([
@@ -181,9 +183,9 @@ resource "aws_ecs_cluster" "new_cluster" {
   name  = var.app_name
   tags  = var.tags
 }
-resource "aws_security_group" "fargate_service_sg" {
+resource "aws_security_group" "fargate_sg" {
   name        = "${var.app_name}-fargate-sg"
-  description = "Controls access to the Fargate Service"
+  description = "Controls access to the ${var.app_name} scheduled Fargate task"
   vpc_id      = var.vpc_id
 
   egress {
@@ -195,27 +197,30 @@ resource "aws_security_group" "fargate_service_sg" {
   tags = var.tags
 }
 
-# ==================== Cloudwatch Event ====================
+# ==================== Cloudwatch EventBridge ====================
 # --- CloudWatch Event IAM Role ---
-data "aws_iam_policy_document" "cloudwatch-event-assume-role-policy" {
+data "aws_iam_policy_document" "assume_role_policy" {
   version = "2012-10-17"
   statement {
     effect  = "Allow"
     actions = ["sts:AssumeRole"]
     principals {
-      identifiers = ["events.amazonaws.com"]
-      type        = "Service"
+      identifiers = compact([
+        local.use_scheduler ? "scheduler.amazonaws.com" : null,
+        local.use_event_rule ? "events.amazonaws.com" : null
+      ])
+      type = "Service"
     }
   }
 }
 
-resource "aws_iam_role" "scheduled-event" {
-  name                 = "${var.app_name}-cloudwatch-scheduled-event"
-  assume_role_policy   = data.aws_iam_policy_document.cloudwatch-event-assume-role-policy.json
+resource "aws_iam_role" "trigger" {
+  name                 = "${var.app_name}-trigger"
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_policy.json
   permissions_boundary = var.role_permissions_boundary_arn
   tags                 = var.tags
 }
-data "aws_iam_policy_document" "event-policy" {
+data "aws_iam_policy_document" "run_task_policy" {
   version = "2012-10-17"
   statement {
     # Allow the Cloudwatch Event Rule to run the ECS task
@@ -230,42 +235,71 @@ data "aws_iam_policy_document" "event-policy" {
     resources = [aws_iam_role.task_execution_role.arn, aws_iam_role.task_role.arn]
   }
 }
-resource "aws_iam_policy" "run-scheduled-task" {
-  name   = "${var.app_name}-run-scheduled-task"
-  policy = data.aws_iam_policy_document.event-policy.json
+resource "aws_iam_policy" "run_task" {
+  name   = "${var.app_name}-run-task"
+  policy = data.aws_iam_policy_document.run_task_policy.json
 }
-resource "aws_iam_role_policy_attachment" "cloudwatch-event-role-policy-attach" {
-  policy_arn = aws_iam_policy.run-scheduled-task.arn
-  role       = aws_iam_role.scheduled-event.name
-}
-
-# --- CloudWatch Event Rule ---
-resource "aws_cloudwatch_event_rule" "scheduled_task" {
-  name                = "${var.app_name}-scheduled-task"
-  description         = var.schedule_expression != null ? "Run ${var.app_name} task at a scheduled time (${var.schedule_expression})" : "Run ${var.app_name} triggered by an event pattern"
-  schedule_expression = var.schedule_expression
-  event_pattern       = var.event_pattern
+resource "aws_iam_role_policy_attachment" "run_task_policy_to_trigger_role" {
+  policy_arn = aws_iam_policy.run_task.arn
+  role       = aws_iam_role.trigger.name
 }
 
-resource "aws_cloudwatch_event_target" "scheduled_task" {
-  target_id = "${var.app_name}-scheduled-task-target"
-  rule      = aws_cloudwatch_event_rule.scheduled_task.name
+# --- EventBridge Scheduler ---
+resource "aws_scheduler_schedule" "schedule" {
+  count                        = local.use_scheduler ? 1 : 0
+  name                         = "${var.app_name}-schedule"
+  description                  = "Run ${var.app_name} task with the schedule: ${var.schedule_expression}"
+  schedule_expression          = var.schedule_expression
+  schedule_expression_timezone = var.schedule_expression_timezone
+  start_date                   = var.start_date
+  end_date                     = var.end_date
+  group_name                   = var.schedule_group_name
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  target {
+    arn      = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
+    role_arn = aws_iam_role.trigger.arn
+    ecs_parameters {
+      task_count          = 1
+      task_definition_arn = aws_ecs_task_definition.task_def.arn
+      launch_type         = "FARGATE"
+      network_configuration {
+        security_groups = concat([aws_security_group.fargate_sg.id], var.security_groups)
+        subnets         = var.private_subnet_ids
+      }
+    }
+  }
+}
+
+# --- EventBridge Event Trigger ---
+resource "aws_cloudwatch_event_rule" "event_trigger" {
+  count         = local.use_event_rule ? 1 : 0
+  name          = "${var.app_name}-event-rule"
+  description   = "Run ${var.app_name} triggered by an event pattern"
+  event_pattern = var.event_pattern
+}
+
+resource "aws_cloudwatch_event_target" "event_target" {
+  count     = local.use_event_rule ? 1 : 0
+  target_id = "${var.app_name}-event-target"
+  rule      = aws_cloudwatch_event_rule.event_trigger[0].name
   arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
-  role_arn  = aws_iam_role.scheduled-event.arn
+  role_arn  = aws_iam_role.trigger.arn
 
   ecs_target {
     task_count          = 1
     task_definition_arn = aws_ecs_task_definition.task_def.arn
     launch_type         = "FARGATE"
-    platform_version    = "1.4.0" // "LATEST" does not point to 1.4.0 as of 4/21/20
     network_configuration {
-      security_groups = concat([aws_security_group.fargate_service_sg.id], var.security_groups)
+      security_groups = concat([aws_security_group.fargate_sg.id], var.security_groups)
       subnets         = var.private_subnet_ids
     }
   }
 }
 
-# ==================== CloudWatch ====================
+# ==================== CloudWatch Logs ====================
 resource "aws_cloudwatch_log_group" "container_log_group" {
   name              = local.cloudwatch_log_group_name
   retention_in_days = var.log_retention_in_days

@@ -47,12 +47,8 @@ output "scheduled_task_definition" {
   value = module.scheduled_fargate.task_definition
 }
 
-output "scheduled_event_rule" {
-  value = module.scheduled_fargate.event_rule
-}
-
-output "scheduled_event_target" {
-  value     = module.scheduled_fargate.event_target
+output "schedule" {
+  value     = module.scheduled_fargate.schedule
   sensitive = true
 }
 
