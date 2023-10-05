@@ -9,8 +9,8 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 
 locals {
-  use_scheduler      = var.schedule_expression != null
-  use_event_rule     = var.event_pattern != null
+  use_scheduler      = var.schedule != null
+  use_event_rule     = var.event != null
   create_new_cluster = var.existing_ecs_cluster == null
   definitions        = [var.primary_container_definition]
   volumes = distinct(flatten([
@@ -200,7 +200,7 @@ resource "aws_security_group" "fargate_sg" {
 # ==================== Cloudwatch EventBridge ====================
 # --- IAM Policy to assume role ---
 data "aws_iam_policy_document" "assume_role_policy" {
-  count = local.use_scheduler || local.use_event_rule ? 1 : 0
+  count   = local.use_scheduler || local.use_event_rule ? 1 : 0
   version = "2012-10-17"
   statement {
     effect  = "Allow"
@@ -217,14 +217,14 @@ data "aws_iam_policy_document" "assume_role_policy" {
 
 # --- IAM Role to be able to run the task ---
 resource "aws_iam_role" "trigger" {
-  count = local.use_scheduler || local.use_event_rule ? 1 : 0
+  count                = local.use_scheduler || local.use_event_rule ? 1 : 0
   name                 = "${var.app_name}-trigger"
   assume_role_policy   = data.aws_iam_policy_document.assume_role_policy[0].json
   permissions_boundary = var.role_permissions_boundary_arn
   tags                 = var.tags
 }
 data "aws_iam_policy_document" "run_task_policy" {
-  count = local.use_scheduler || local.use_event_rule ? 1 : 0
+  count   = local.use_scheduler || local.use_event_rule ? 1 : 0
   version = "2012-10-17"
   statement {
     # Allow the Cloudwatch Event Rule and/or Scheduler to run the ECS task
@@ -240,12 +240,12 @@ data "aws_iam_policy_document" "run_task_policy" {
   }
 }
 resource "aws_iam_policy" "run_task" {
-  count = local.use_scheduler || local.use_event_rule ? 1 : 0
+  count  = local.use_scheduler || local.use_event_rule ? 1 : 0
   name   = "${var.app_name}-run-task"
   policy = data.aws_iam_policy_document.run_task_policy[0].json
 }
 resource "aws_iam_role_policy_attachment" "run_task_policy_to_trigger_role" {
-  count = local.use_scheduler || local.use_event_rule ? 1 : 0
+  count      = local.use_scheduler || local.use_event_rule ? 1 : 0
   policy_arn = aws_iam_policy.run_task[0].arn
   role       = aws_iam_role.trigger[0].name
 }
@@ -254,12 +254,12 @@ resource "aws_iam_role_policy_attachment" "run_task_policy_to_trigger_role" {
 resource "aws_scheduler_schedule" "schedule" {
   count                        = local.use_scheduler ? 1 : 0
   name                         = "${var.app_name}-schedule"
-  description                  = "Run ${var.app_name} task with the schedule: ${var.schedule_expression}"
-  schedule_expression          = var.schedule_expression
-  schedule_expression_timezone = var.schedule_expression_timezone
-  start_date                   = var.start_date
-  end_date                     = var.end_date
-  group_name                   = var.schedule_group_name
+  description                  = "Run ${var.app_name} task with the schedule: ${var.schedule.expression}"
+  schedule_expression          = var.schedule.expression
+  schedule_expression_timezone = var.schedule.timezone
+  start_date                   = var.schedule.start_date
+  end_date                     = var.schedule.end_date
+  group_name                   = var.schedule.group_name
   flexible_time_window {
     mode = "OFF"
   }
@@ -284,7 +284,7 @@ resource "aws_cloudwatch_event_rule" "event_trigger" {
   count         = local.use_event_rule ? 1 : 0
   name          = "${var.app_name}-event-rule"
   description   = "Run ${var.app_name} triggered by an event pattern"
-  event_pattern = var.event_pattern
+  event_pattern = var.event.pattern
 }
 
 resource "aws_cloudwatch_event_target" "event_target" {

@@ -59,11 +59,14 @@ module "scheduled_fargate" {
   existing_ecs_cluster = {
     arn = aws_ecs_cluster.existing.arn
   }
-  schedule_expression          = "rate(5 minutes)"
-  schedule_expression_timezone = "UTC"
-  start_date                   = "2023-10-01T00:00:00.000Z"
-  end_date                     = "2023-10-02T00:00:00.000Z"
-  log_group_name               = aws_scheduler_schedule_group.group.name
+  schedule = {
+    expression = "rate(5 minutes)"
+    timezone   = "UTC"
+    start_date = "2023-10-01T00:00:00.000Z"
+    end_date   = "2023-10-02T00:00:00.000Z"
+  }
+
+  log_group_name = aws_scheduler_schedule_group.group.name
   primary_container_definition = {
     name  = "test-dynamo"
     image = "${aws_ecr_repository.repo.repository_url}:${var.image_tag}"
