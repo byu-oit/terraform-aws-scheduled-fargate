@@ -198,8 +198,9 @@ resource "aws_security_group" "fargate_sg" {
 }
 
 # ==================== Cloudwatch EventBridge ====================
-# --- CloudWatch Event IAM Role ---
+# --- IAM Policy to assume role ---
 data "aws_iam_policy_document" "assume_role_policy" {
+  count = local.use_scheduler || local.use_event_rule ? 1 : 0
   version = "2012-10-17"
   statement {
     effect  = "Allow"
@@ -214,34 +215,39 @@ data "aws_iam_policy_document" "assume_role_policy" {
   }
 }
 
+# --- IAM Role to be able to run the task ---
 resource "aws_iam_role" "trigger" {
+  count = local.use_scheduler || local.use_event_rule ? 1 : 0
   name                 = "${var.app_name}-trigger"
-  assume_role_policy   = data.aws_iam_policy_document.assume_role_policy.json
+  assume_role_policy   = data.aws_iam_policy_document.assume_role_policy[0].json
   permissions_boundary = var.role_permissions_boundary_arn
   tags                 = var.tags
 }
 data "aws_iam_policy_document" "run_task_policy" {
+  count = local.use_scheduler || local.use_event_rule ? 1 : 0
   version = "2012-10-17"
   statement {
-    # Allow the Cloudwatch Event Rule to run the ECS task
+    # Allow the Cloudwatch Event Rule and/or Scheduler to run the ECS task
     effect    = "Allow"
     actions   = ["ecs:runTask"]
     resources = [aws_ecs_task_definition.task_def.arn]
   }
   statement {
-    # Allow the Cloudwatch Event Rule to pass the task roles to the started ECS task
+    # Allow the Cloudwatch Event Rule and/or Scheduler  to pass the task roles to the started ECS task
     effect    = "Allow"
     actions   = ["iam:PassRole"]
     resources = [aws_iam_role.task_execution_role.arn, aws_iam_role.task_role.arn]
   }
 }
 resource "aws_iam_policy" "run_task" {
+  count = local.use_scheduler || local.use_event_rule ? 1 : 0
   name   = "${var.app_name}-run-task"
-  policy = data.aws_iam_policy_document.run_task_policy.json
+  policy = data.aws_iam_policy_document.run_task_policy[0].json
 }
 resource "aws_iam_role_policy_attachment" "run_task_policy_to_trigger_role" {
-  policy_arn = aws_iam_policy.run_task.arn
-  role       = aws_iam_role.trigger.name
+  count = local.use_scheduler || local.use_event_rule ? 1 : 0
+  policy_arn = aws_iam_policy.run_task[0].arn
+  role       = aws_iam_role.trigger[0].name
 }
 
 # --- EventBridge Scheduler ---
@@ -260,7 +266,7 @@ resource "aws_scheduler_schedule" "schedule" {
 
   target {
     arn      = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
-    role_arn = aws_iam_role.trigger.arn
+    role_arn = aws_iam_role.trigger[0].arn
     ecs_parameters {
       task_count          = 1
       task_definition_arn = aws_ecs_task_definition.task_def.arn
@@ -286,7 +292,7 @@ resource "aws_cloudwatch_event_target" "event_target" {
   target_id = "${var.app_name}-event-target"
   rule      = aws_cloudwatch_event_rule.event_trigger[0].name
   arn       = local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].arn : var.existing_ecs_cluster.arn
-  role_arn  = aws_iam_role.trigger.arn
+  role_arn  = aws_iam_role.trigger[0].arn
 
   ecs_target {
     task_count          = 1

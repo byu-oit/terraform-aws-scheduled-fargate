@@ -34,3 +34,15 @@ output "task_execution_role" {
 output "task_role" {
   value = aws_iam_role.task_role
 }
+
+output "run_task_cli_command" {
+  value = <<EOT
+aws ecs run-task \
+--task-definition ${aws_ecs_task_definition.task_def.id} \
+--cluster ${local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].name : var.existing_ecs_cluster.arn} \
+--network-configuration "{\"awsvpcConfiguration\":{\"subnets\":[\"${var.private_subnet_ids[0]}\"],\"securityGroups\":[\"${aws_security_group.fargate_sg.id}\"],\"assignPublicIp\":\"ENABLED\"}}" \
+--launch-type FARGATE \
+--propagate-tags TASK_DEFINITION
+EOT
+  sensitive = true
+}
