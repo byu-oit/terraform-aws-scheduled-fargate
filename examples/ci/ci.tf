@@ -19,9 +19,11 @@ module "acs" {
 
 module "scheduled_fargate" {
   #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
-  source              = "../../"
-  app_name            = "test-scheduled-fargate-dev"
-  schedule_expression = "rate(5 minutes)"
+  source   = "../../"
+  app_name = "test-scheduled-fargate-dev"
+  schedule = {
+    expression = "rate(5 minutes)"
+  }
   primary_container_definition = {
     name  = "test"
     image = "hello-world"
@@ -63,5 +65,10 @@ output "task_execution_role" {
 
 output "task_role" {
   value     = module.scheduled_fargate.task_role
+  sensitive = true
+}
+
+output "run_task_cli_command" {
+  value     = module.scheduled_fargate.run_task_cli_command
   sensitive = true
 }

@@ -36,7 +36,7 @@ output "task_role" {
 }
 
 output "run_task_cli_command" {
-  value = <<EOT
+  value     = <<EOT
 aws ecs run-task \
 --task-definition ${aws_ecs_task_definition.task_def.id} \
 --cluster ${local.create_new_cluster ? aws_ecs_cluster.new_cluster[0].name : var.existing_ecs_cluster.arn} \

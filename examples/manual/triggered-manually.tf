@@ -19,8 +19,8 @@ module "acs" {
 
 module "scheduled_fargate" {
   #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
-  source        = "../../"
-  app_name      = "triggered-manually-example-dev"
+  source   = "../../"
+  app_name = "triggered-manually-example-dev"
   primary_container_definition = {
     name  = "test"
     image = "hello-world"
@@ -31,6 +31,6 @@ module "scheduled_fargate" {
 }
 
 output "run_task_cli_command" {
-  value = module.scheduled_fargate.run_task_cli_command
+  value     = module.scheduled_fargate.run_task_cli_command
   sensitive = true
 }

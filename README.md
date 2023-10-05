@@ -5,22 +5,15 @@ Creates a scheduled Fargate Task in AWS
 
 #### [New to Terraform Modules at BYU?](https://github.com/byu-oit/terraform-documentation)
 
-## Migration to v4
-V4 has a significant amount of breaking changes from v3 and earlier.
-
-1. How we use an existing ECS cluster allowing the creating of a cluster alongside using it as an existing cluster in the same terraform configuration.
-2. This module now uses the [EventBridge Scheduler](https://docs.aws.amazon.com/eventbridge/latest/userguide/scheduler.html) instead of CloudWatch EventBridge Rules.
-3. This module no longer supports starting a fargate task from an event (e.g. S3 put object event).
-
-View the release notes for more detailed changes
-
 ## Usage
 ```hcl
 module "test_scheduled_task" {
    source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
 
-   app_name                     = "test-scheduled-fargate-dev"
-   schedule_expression          = "rate(5 minutes)"
+   app_name = "test-scheduled-fargate-dev"
+   schedule = {
+      expression = "rate(5 minutes)"
+   }
    primary_container_definition = {
       name  = "test"
       image = "hello-world"
@@ -31,33 +24,38 @@ module "test_scheduled_task" {
 }
 ```
 
+## Migration to v4
+V4 has a significant amount of breaking changes from v3 and earlier:
+
+* How we use an existing ECS cluster allowing the creating of a cluster alongside using it as an existing cluster in the same terraform configuration.
+* This module now uses the [EventBridge Scheduler](https://docs.aws.amazon.com/eventbridge/latest/userguide/scheduler.html) instead of CloudWatch EventBridge Rules.
+
+[**View the migration how-to-guide**](docs/migration-to-v4.md)
+
 ## Requirements
 * Terraform version 1.3 or greater
 * AWS provider version 4.0 or greater
 
 ## Inputs
-| Name                          | Type                            | Description                                                                                                                                                                                   | Default                       |
-|-------------------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
-| app_name                      | string                          | Application name to name your scheduled Fargate task and other resources                                                                                                                      |                               |
-| existing_ecs_cluster          | [object](#existing_ecs_cluster) | Existing ECS Cluster configuration to host the fargate scheduled task. Defaults to creating its own cluster.                                                                                  |                               |
-| schedule_expression           | string                          | When to execute this fargate task. Use 'cron()', 'rate()', or 'at()'. See [docs](https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html) for options.                     | null                          |
-| schedule_expression_timezone  | string                          | Timezone for the scheduled expression. Defaults to America/Denver.                                                                                                                            | America/Denver                |
-| start_date                    | string                          | The timestamp (ISO format UTC time zone), after which the scheduled task will begin following the schedule_expression.  If null or not provided, then this schedule is effective immediately. | null (effective immediately)  |
-| end_date                      | string                          | The timestamp (ISO format UTC time zone) when the scheduled task will stop being invoked. If null or not provided, then this schedule is effective forever.                                   | null (effective forever)      |
-| schedule_group_name           | string                          | Existing EventBridge Scheduler Schedule Group name to group related scheduled tasks in the CloudWatch Scheduler. Defaults to the default group in every AWS account.                          | default                       |
-| event_pattern                 | string                          | The event pattern described as a JSON object. See [docs](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-event-patterns.html) for valid event pattern syntax.                     | null                          |
-| primary_container_definition  | [object](#container_definition) | The primary container definition for your application                                                                                                                                         |                               |
-| task_cpu                      | number                          | CPU for the task definition                                                                                                                                                                   | 256                           |
-| task_memory                   | number                          | Memory for the task definition                                                                                                                                                                | 512                           |
-| cpu_architecture              | string                          | CPU architecture for the task definition. See [docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#runtime-platform) for options                | "X86_64"                      |
-| task_policies                 | list(string)                    | List of IAM Policy ARNs to attach to the task execution IAM Policy                                                                                                                            | []                            |
-| security_groups               | list(string)                    | List of extra security group IDs to attach to the fargate task                                                                                                                                | []                            |
-| log_retention_in_days         | number                          | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.                                  | 7                             |
-| log_group_name                | string                          | The Cloudwatch Log Group name                                                                                                                                                                 | scheduled-fargate/${app_name} |
-| vpc_id                        | string                          | VPC ID to deploy the ECS fargate service and ALB                                                                                                                                              |                               |
-| private_subnet_ids            | list(string)                    | List of subnet IDs for the fargate service                                                                                                                                                    |                               |
-| role_permissions_boundary_arn | string                          | ARN of the IAM Role permissions boundary to place on each IAM role created                                                                                                                    |                               |
-| tags                          | map(string)                     | A map of AWS Tags to attach to each resource created                                                                                                                                          | {}                            |
+| Name                          | Type                            | Description                                                                                                                                                                    | Default                       |
+|-------------------------------|---------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
+| app_name                      | string                          | Application name to name your scheduled Fargate task and other resources                                                                                                       |                               |
+| existing_ecs_cluster          | [object](#existing_ecs_cluster) | Existing ECS Cluster configuration to host the fargate scheduled task. Defaults to creating its own cluster.                                                                   |                               |
+| schedule_expression           | string                          | When to execute this fargate task. Use 'cron()', 'rate()', or 'at()'. See [docs](https://docs.aws.amazon.com/scheduler/latest/UserGuide/schedule-types.html) for options.      | null                          |
+| schedule                      | [object](#schedule)             | Configuration to run this fargate task on a schedule                                                                                                                           |                               |
+| event                         | [object](#event)                | Configuration to run this fargate task triggered by an event                                                                                                                   |                               |
+| primary_container_definition  | [object](#container_definition) | The primary container definition for your application                                                                                                                          |                               |
+| task_cpu                      | number                          | CPU for the task definition                                                                                                                                                    | 256                           |
+| task_memory                   | number                          | Memory for the task definition                                                                                                                                                 | 512                           |
+| cpu_architecture              | string                          | CPU architecture for the task definition. See [docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#runtime-platform) for options | "X86_64"                      |
+| task_policies                 | list(string)                    | List of IAM Policy ARNs to attach to the task execution IAM Policy                                                                                                             | []                            |
+| security_groups               | list(string)                    | List of extra security group IDs to attach to the fargate task                                                                                                                 | []                            |
+| log_retention_in_days         | number                          | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.                   | 7                             |
+| log_group_name                | string                          | The Cloudwatch Log Group name                                                                                                                                                  | scheduled-fargate/${app_name} |
+| vpc_id                        | string                          | VPC ID to deploy the ECS fargate service and ALB                                                                                                                               |                               |
+| private_subnet_ids            | list(string)                    | List of subnet IDs for the fargate service                                                                                                                                     |                               |
+| role_permissions_boundary_arn | string                          | ARN of the IAM Role permissions boundary to place on each IAM role created                                                                                                     |                               |
+| tags                          | map(string)                     | A map of AWS Tags to attach to each resource created                                                                                                                           | {}                            |
 
 #### existing_ecs_cluster
 Object with following attributes to define an existing ECS cluster to deploy the fargate tasks.
@@ -76,6 +74,18 @@ module "test_scheduled_task" {
   // ...
 }
 ```
+
+#### schedule
+Object with configuration needed to run this fargate task on a schedule
+* **`expression`** - (Required) When to execute this fargate task. Use 'cron()', 'rate()', or 'at()'.
+* **`timezone`** - Timezone for the scheduled expression. Defaults to America/Denver.
+* **`start_date`** - The timestamp (ISO format UTC time zone), after which the scheduled task will begin following the schedule_expression. If null or not provided, then this schedule is effective immediately. Defaults to null.
+* **`end_date`** - The timestamp (ISO format UTC time zone) when the scheduled task will stop being invoked. If null or not provided, then this schedule is effective forever. Defaults to null.
+* **`group_name`** - Existing EventBridge Scheduler Schedule Group name to group related scheduled tasks in the CloudWatch Scheduler. Defaults to the default group in every AWS account.
+
+#### event
+Object with configuration needed to run this fargate task triggered by an event
+* **`pattern`** - (Required) The event pattern described as a JSON object.
 
 #### container_definition
 Object with following attributes to define the docker container(s) your fargate needs to run.
