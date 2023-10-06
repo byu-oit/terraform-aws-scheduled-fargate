@@ -12,7 +12,7 @@ variable "existing_ecs_cluster" {
 variable "schedule" {
   type = object({
     expression = string
-    timezone   = optional(string, "America/Denver")
+    timezone   = optional(string)
     start_date = optional(string)
     end_date   = optional(string)
     group_name = optional(string)

@@ -77,7 +77,7 @@ module "test_scheduled_task" {
 #### schedule
 Object with configuration needed to run this fargate task on a schedule
 * **`expression`** - (Required) When to execute this fargate task. Use 'cron()', 'rate()', or 'at()'.
-* **`timezone`** - Timezone for the scheduled expression. Defaults to America/Denver.
+* **`timezone`** - Timezone for the scheduled expression.
 * **`start_date`** - The timestamp (ISO format UTC time zone), after which the scheduled task will begin following the schedule_expression. If null or not provided, then this schedule is effective immediately. Defaults to null.
 * **`end_date`** - The timestamp (ISO format UTC time zone) when the scheduled task will stop being invoked. If null or not provided, then this schedule is effective forever. Defaults to null.
 * **`group_name`** - Existing EventBridge Scheduler Schedule Group name to group related scheduled tasks in the CloudWatch Scheduler. Defaults to the default group in every AWS account.
