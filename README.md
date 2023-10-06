@@ -164,7 +164,7 @@ This allows for testing your scheduled fargate without having to wait for the ap
    aws ecs run-task \
      --task-definition <TASK_DEFINITION> \
      --cluster <ECS_CLUSTER> \
-     --network-configuration "{\"awsvpcConfiguration\":{\"subnets\":[\"<subnet-SUBNET_ID>\"],\"securityGroups\":[\"<sg-SECURITY_GROUP_ID>\"],\"assignPublicIp\":\"ENABLED\"}}" \
+     --network-configuration "{\"awsvpcConfiguration\":{\"subnets\":[\"<subnet-SUBNET_ID>\"],\"securityGroups\":[\"<sg-SECURITY_GROUP_ID>\"]}}" \
      --launch-type FARGATE \
      --propagate-tags TASK_DEFINITION
    ```
