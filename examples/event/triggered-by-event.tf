@@ -4,13 +4,17 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 resource "aws_s3_bucket" "test_bucket" {
@@ -23,10 +27,11 @@ resource "aws_s3_bucket_notification" "notify_eventbridge" {
 }
 
 module "scheduled_fargate" {
-  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.1"
-  source        = "../../"
-  app_name      = "event-triggered-fargate-example-dev"
-  event_pattern = <<EOF
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  source   = "../../"
+  app_name = "event-triggered-fargate-example-dev"
+  event = {
+    pattern = <<EOF
   {
     "source": ["aws.s3"],
     "detail-type": ["Object Created"],
@@ -37,16 +42,12 @@ module "scheduled_fargate" {
     }
   }
 EOF
+  }
   primary_container_definition = {
     name  = "test"
     image = "hello-world"
   }
-  event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
-
-  tags = {
-    app = "testing-event-triggered-fargate"
-  }
 }

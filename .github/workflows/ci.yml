@@ -22,14 +22,14 @@ jobs:
 
       - name: Terraform Format
         working-directory: "./"
-        run: terraform fmt -check -recursive
+        run: terraform fmt -check -recursive -diff
 
   plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        terraform: [ '1.3.x' ]
+        terraform: [ '1.3.x', '1.4.x', '1.5.x' ]
       fail-fast: false
     permissions:
       contents: read

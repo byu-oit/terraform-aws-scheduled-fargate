@@ -4,13 +4,18 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
+
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 variable "env" {
@@ -31,6 +36,9 @@ locals {
   }
 }
 
+resource "aws_ecs_cluster" "existing" {
+  name = "test-existing-cluster"
+}
 resource "aws_ecr_repository" "repo" {
   name = "test-existing-ecr"
 }
@@ -39,12 +47,26 @@ output "repo_url" {
   value = aws_ecr_repository.repo.repository_url
 }
 
+resource "aws_scheduler_schedule_group" "group" {
+  name = "test"
+}
+
 // Scheduled fargate
 module "scheduled_fargate" {
-  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.1"
-  app_name            = local.name
-  ecs_cluster_name    = aws_ecr_repository.repo.name
-  schedule_expression = "rate(5 minutes)"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  source   = "../../"
+  app_name = local.name
+  existing_ecs_cluster = {
+    arn = aws_ecs_cluster.existing.arn
+  }
+  schedule = {
+    expression = "rate(5 minutes)"
+    timezone   = "UTC"
+    start_date = "2023-10-01T00:00:00.000Z"
+    end_date   = "2023-10-02T00:00:00.000Z"
+  }
+
+  log_group_name = aws_scheduler_schedule_group.group.name
   primary_container_definition = {
     name  = "test-dynamo"
     image = "${aws_ecr_repository.repo.repository_url}:${var.image_tag}"
@@ -61,7 +83,6 @@ module "scheduled_fargate" {
     ]
   }
   task_policies                 = [aws_iam_policy.my_dynamo_policy.arn]
-  event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
@@ -127,7 +148,7 @@ resource "aws_security_group" "efs_sg" {
 }
 
 resource "aws_efs_mount_target" "efs_target" {
-  for_each = toset(module.acs.private_subnet_ids)
+  for_each = nonsensitive(toset(module.acs.private_subnet_ids))
 
   file_system_id  = aws_efs_file_system.my_efs.id
   subnet_id       = each.key

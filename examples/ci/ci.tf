@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
@@ -14,19 +14,20 @@ provider "aws" {
 }
 
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 module "scheduled_fargate" {
-  source = "../../"
-
-  app_name            = "test-scheduled-fargate-dev"
-  schedule_expression = "rate(5 minutes)"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  source   = "../../"
+  app_name = "test-scheduled-fargate-dev"
+  schedule = {
+    expression = "rate(5 minutes)"
+  }
   primary_container_definition = {
     name  = "test"
     image = "hello-world"
   }
-  event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
@@ -36,9 +37,8 @@ module "scheduled_fargate" {
   }
 }
 
-
-output "scheduled_fargate_ecs_cluster" {
-  value = module.scheduled_fargate.ecs_cluster
+output "scheduled_fargate_new_ecs_cluster" {
+  value = module.scheduled_fargate.new_ecs_cluster
 }
 
 output "scheduled_fargate_security_group" {
@@ -49,12 +49,8 @@ output "scheduled_task_definition" {
   value = module.scheduled_fargate.task_definition
 }
 
-output "scheduled_event_rule" {
-  value = module.scheduled_fargate.event_rule
-}
-
-output "scheduled_event_target" {
-  value     = module.scheduled_fargate.event_target
+output "schedule" {
+  value     = module.scheduled_fargate.schedule
   sensitive = true
 }
 
@@ -69,5 +65,10 @@ output "task_execution_role" {
 
 output "task_role" {
   value     = module.scheduled_fargate.task_role
+  sensitive = true
+}
+
+output "run_task_cli_command" {
+  value     = module.scheduled_fargate.run_task_cli_command
   sensitive = true
 }

@@ -2,19 +2,29 @@ variable "app_name" {
   type        = string
   description = "Scheduled Fargate Application name."
 }
-variable "ecs_cluster_name" {
-  type        = string
-  description = "ECS Cluster name to host the scheduled fargate task. Defaults to creating its own cluster."
+variable "existing_ecs_cluster" {
+  type = object({
+    arn = string
+  })
+  description = "Existing ECS Cluster configuration to host the fargate scheduled task. Defaults to creating its own cluster."
   default     = null
 }
-variable "schedule_expression" {
-  type        = string
-  description = "When to execute this fargate task. Use 'cron()' or 'rate()' At least one of schedule_expression or event_pattern is required."
+variable "schedule" {
+  type = object({
+    expression = string
+    timezone   = optional(string)
+    start_date = optional(string)
+    end_date   = optional(string)
+    group_name = optional(string)
+  })
+  description = "Configuration to run this fargate task on a schedule"
   default     = null
 }
-variable "event_pattern" {
-  type        = string
-  description = "The event pattern described a JSON object. At least one of schedule_expression or event_pattern is required."
+variable "event" {
+  type = object({
+    pattern = string
+  })
+  description = "Configuration to run this fargate task triggered by an event"
   default     = null
 }
 variable "primary_container_definition" {
@@ -68,11 +78,6 @@ variable "log_group_name" {
   type        = string
   description = "The Cloudwatch Log Group name."
   default     = ""
-}
-// AWS account config variables
-variable "event_role_arn" {
-  type        = string
-  description = "IAM Role ARN to attach to CloudWatch Event Rule (typically PowerBuilder)"
 }
 variable "vpc_id" {
   type        = string

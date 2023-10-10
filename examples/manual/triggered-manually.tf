@@ -4,29 +4,33 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 3.69"
+      version = "~> 4.0"
     }
   }
 }
 
+provider "aws" {
+  region = "us-west-2"
+}
+
 module "acs" {
-  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v3.5.0"
+  source = "github.com/byu-oit/terraform-aws-acs-info?ref=v4.0.0"
 }
 
 module "scheduled_fargate" {
-  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.1"
-  app_name            = "scheduled-fargate-simple-example-dev"
-  schedule_expression = "rate(5 minutes)"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  source   = "../../"
+  app_name = "triggered-manually-example-dev"
   primary_container_definition = {
     name  = "test"
     image = "hello-world"
   }
-  event_role_arn                = module.acs.power_builder_role.arn
   vpc_id                        = module.acs.vpc.id
   private_subnet_ids            = module.acs.private_subnet_ids
   role_permissions_boundary_arn = module.acs.role_permissions_boundary.arn
+}
 
-  tags = {
-    app = "testing-scheduled-fargate"
-  }
+output "run_task_cli_command" {
+  value     = module.scheduled_fargate.run_task_cli_command
+  sensitive = true
 }
