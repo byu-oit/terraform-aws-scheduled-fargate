@@ -8,7 +8,7 @@ Creates a scheduled Fargate Task in AWS
 ## Usage
 ```hcl
 module "test_scheduled_task" {
-   source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+   source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.1.0"
 
    app_name = "test-scheduled-fargate-dev"
    schedule = {
@@ -49,7 +49,7 @@ V4 has a significant amount of breaking changes from v3 and earlier:
 | cpu_architecture              | string                          | CPU architecture for the task definition. See [docs](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definition_parameters.html#runtime-platform) for options | "X86_64"                      |
 | task_policies                 | list(string)                    | List of IAM Policy ARNs to attach to the task execution IAM Policy                                                                                                             | []                            |
 | security_groups               | list(string)                    | List of extra security group IDs to attach to the fargate task                                                                                                                 | []                            |
-| log_retention_in_days         | number                          | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.                   | 7                             |
+| log_retention_in_days         | number                          | The number of days to keep logs in CloudWatch Log Group. Possible values are: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, and 3653.                   | 120                           |
 | log_group_name                | string                          | The Cloudwatch Log Group name                                                                                                                                                  | scheduled-fargate/${app_name} |
 | vpc_id                        | string                          | VPC ID to deploy the ECS fargate service and ALB                                                                                                                               |                               |
 | private_subnet_ids            | list(string)                    | List of subnet IDs for the fargate service                                                                                                                                     |                               |
@@ -63,7 +63,7 @@ Object with following attributes to define an existing ECS cluster to deploy the
 If you want to deploy this scheduled fargate task onto an existing cluster you would need to define this variable. For example:
 ```hcl
 module "test_scheduled_task" {
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.1.0"
 
   app_name             = "test-scheduled-fargate-dev"
   existing_ecs_cluster = {

@@ -53,7 +53,7 @@ resource "aws_scheduler_schedule_group" "group" {
 
 // Scheduled fargate
 module "scheduled_fargate" {
-  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.1.0"
   source   = "../../"
   app_name = local.name
   existing_ecs_cluster = {

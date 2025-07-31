@@ -13,7 +13,7 @@ V4 has a significant amount of breaking changes from v3 and earlier:
 ```diff
 module "scheduled_fargate" {
 -  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.1"
-  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.1.0"
   app_name = "test-scheduled-fargate-dev"
 -  schedule_expression = "rate(5 minutes)"
 +  schedule = {
@@ -38,7 +38,7 @@ module "scheduled_fargate" {
 ```diff
 module "scheduled_fargate" {
 -  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v3.0.1"
-+  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
++  source = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.1.0"
   app_name      = "event-triggered-fargate-example-dev"
 -  event_pattern = <<EOF
 +  event = {

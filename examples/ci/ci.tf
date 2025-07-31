@@ -18,7 +18,7 @@ module "acs" {
 }
 
 module "scheduled_fargate" {
-  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.1.0"
   source   = "../../"
   app_name = "test-scheduled-fargate-dev"
   schedule = {

@@ -71,8 +71,8 @@ variable "security_groups" {
 }
 variable "log_retention_in_days" {
   type        = number
-  description = "The number of days to keep logs in CloudWatch Log Group. Defaults to 7."
-  default     = 7
+  description = "The number of days to keep logs in CloudWatch Log Group. Defaults to 120."
+  default     = 120
 }
 variable "log_group_name" {
   type        = string
