@@ -27,7 +27,7 @@ resource "aws_s3_bucket_notification" "notify_eventbridge" {
 }
 
 module "scheduled_fargate" {
-  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.0.0"
+  #  source              = "github.com/byu-oit/terraform-aws-scheduled-fargate?ref=v4.1.0"
   source   = "../../"
   app_name = "event-triggered-fargate-example-dev"
   event = {
