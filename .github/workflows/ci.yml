@@ -36,6 +36,7 @@ jobs:
       actions: read
       pull-requests: write
       id-token: write
+      security-events: write
     steps:
       - uses: actions/checkout@v3
 
