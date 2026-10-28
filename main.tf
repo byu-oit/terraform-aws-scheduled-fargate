@@ -168,8 +168,9 @@ resource "aws_ecs_task_definition" "task_def" {
     content {
       name = volume.value.name
       efs_volume_configuration {
-        file_system_id = volume.value.file_system_id
-        root_directory = volume.value.root_directory
+        file_system_id     = volume.value.file_system_id
+        root_directory     = volume.value.root_directory
+        transit_encryption = "ENABLED"
       }
     }
   }
@@ -182,13 +183,19 @@ resource "aws_ecs_cluster" "new_cluster" {
   count = local.create_new_cluster ? 1 : 0 # if custer is not provided create one
   name  = var.app_name
   tags  = var.tags
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
+# trivy:ignore:AWS-0104 because applications choose their outbound dependencies
 resource "aws_security_group" "fargate_sg" {
   name        = "${var.app_name}-fargate-sg"
   description = "Controls access to the ${var.app_name} scheduled Fargate task"
   vpc_id      = var.vpc_id
 
   egress {
+    description = "Scheduled task outbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -237,6 +244,11 @@ data "aws_iam_policy_document" "run_task_policy" {
     effect    = "Allow"
     actions   = ["iam:PassRole"]
     resources = [aws_iam_role.task_execution_role.arn, aws_iam_role.task_role.arn]
+    condition {
+      test     = "StringEquals"
+      variable = "iam:PassedToService"
+      values   = ["ecs-tasks.amazonaws.com"]
+    }
   }
 }
 resource "aws_iam_policy" "run_task" {
@@ -306,6 +318,7 @@ resource "aws_cloudwatch_event_target" "event_target" {
 }
 
 # ==================== CloudWatch Logs ====================
+# trivy:ignore:AWS-0017
 resource "aws_cloudwatch_log_group" "container_log_group" {
   name              = local.cloudwatch_log_group_name
   retention_in_days = var.log_retention_in_days
