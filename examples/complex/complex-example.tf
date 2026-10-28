@@ -132,7 +132,9 @@ EOF
 }
 
 // EFS and wiring up to make sure fargate can talk to EFS
-resource "aws_efs_file_system" "my_efs" {}
+resource "aws_efs_file_system" "my_efs" {
+  encrypted = true
+}
 
 resource "aws_security_group" "efs_sg" {
   name        = "${local.name}-efs"
